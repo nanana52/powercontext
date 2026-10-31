@@ -1,0 +1,59 @@
+{
+  "mode": "text",
+  "hits": [
+    {
+      "memory": {
+        "artifact": {
+          "family": "atomic-memory",
+          "artifact_id": "art_265f76963fb14064bb5d4516a36f0813",
+          "revision": 1
+        },
+        "kind": "decision",
+        "text": "BOUNDARY2026 task opened. Before MiniMax edit: inclusive boundary tests fail on incorrect quote, regression tests pass.",
+        "state": "active",
+        "state_version": 0,
+        "merged_into_id": null
+      },
+      "score": 0.01639344262295082,
+      "matched_by": [
+        "text"
+      ]
+    },
+    {
+      "memory": {
+        "artifact": {
+          "family": "atomic-memory",
+          "artifact_id": "art_4362b98b0f2d4b08b724856631decf69",
+          "revision": 1
+        },
+        "kind": "decision",
+        "text": "BOUNDARY2026 task opened. Before MiniMax edit: inclusive boundary tests fail on incorrect quote, regression tests pass.",
+        "state": "active",
+        "state_version": 0,
+        "merged_into_id": null
+      },
+      "score": 0.016129032258064516,
+      "matched_by": [
+        "text"
+      ]
+    },
+    {
+      "memory": {
+        "artifact": {
+          "family": "atomic-memory",
+          "artifact_id": "art_958dd9f374dd4e0ba646c02c53315ba2",
+          "revision": 1
+        },
+        "kind": "decision",
+        "text": "BOUNDARY2026 task opened. Before MiniMax edit: inclusive boundary tests fail on incorrect quote, regression tests pass.",
+        "state": "active",
+        "state_version": 0,
+        "merged_into_id": null
+      },
+      "score": 0.015873015873015872,
+      "matched_by": [
+        "text"
+      ]
+    }
+  ]
+}

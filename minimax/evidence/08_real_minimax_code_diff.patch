@@ -1,0 +1,9 @@
+--- snapshots/before/shipping.py
++++ app/shipping.py
+@@ -10,5 +10,5 @@
+         raise ValueError("negative subtotal")
+     if method not in ("standard", "express"):
+         raise ValueError("unknown shipping method")
+-    base_fee = Decimal("0") if amount > FREE_SHIPPING_MINIMUM else STANDARD_FEE
++    base_fee = Decimal("0") if amount >= FREE_SHIPPING_MINIMUM else STANDARD_FEE
+     return base_fee + (EXPRESS_SURCHARGE if method == "express" else Decimal("0"))

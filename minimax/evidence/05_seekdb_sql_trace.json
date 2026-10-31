@@ -1,0 +1,50 @@
+[
+  {
+    "sql": "CREATE TABLE IF NOT EXISTS sdd_docs (doc_key VARCHAR(64) NOT NULL PRIMARY KEY, kind VARCHAR(16) NOT NULL, path VARCHAR(255) NOT NULL, digest_sha256 VARCHAR(64) NOT NULL, body LONGTEXT NOT NULL)",
+    "args": []
+  },
+  {
+    "sql": "INSERT INTO sdd_docs(doc_key,kind,path,digest_sha256,body) VALUES(%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE kind=VALUES(kind),path=VALUES(path),digest_sha256=VALUES(digest_sha256),body=VALUES(body)",
+    "args": [
+      "spec-current",
+      "spec",
+      "specs/shipping.md",
+      "722c5189a508a1f04a8d9dc5a11bf9985f8ea6ec3a8d8ce47f445b8a649044c8",
+      "# Shipping policy (active specification, revision 2)\n\n- SPEC-SHIP-001: For subtotal **>= CNY 100.00**, standard shipping costs CNY 0.\n- SPEC-SHIP-002: For subtotal < CNY 100.00, standard shipping costs CNY 8.\n- SPEC-SHIP-003: Express shipping adds CNY 12 to the applicable standard fee.\n- SPEC-SHIP-004: Negative subtotal and unknown shipping methods raise ValueError.\n- SPEC-SHIP-005: Keep the public `shipping_quote(subtotal, method=\"standard\")` API\n  and Decimal output unchanged.\nThe archived policy is obsolete. Fix the inclusive boundary without changing other behaviors.\n"
+    ]
+  },
+  {
+    "sql": "INSERT INTO sdd_docs(doc_key,kind,path,digest_sha256,body) VALUES(%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE kind=VALUES(kind),path=VALUES(path),digest_sha256=VALUES(digest_sha256),body=VALUES(body)",
+    "args": [
+      "app-shipping",
+      "code",
+      "app/shipping.py",
+      "adc8482d6dfba9db6cf837ecf0f93393daecb957ea656c59c1333d52381fb629",
+      "\"\"\"Order shipping quote, intentionally buggy at exactly CNY 100.\"\"\"\nfrom decimal import Decimal\nFREE_SHIPPING_MINIMUM = Decimal(\"100\")\nSTANDARD_FEE = Decimal(\"8\")\nEXPRESS_SURCHARGE = Decimal(\"12\")\n\ndef shipping_quote(subtotal, method=\"standard\"):\n    amount = Decimal(str(subtotal))\n    if amount < 0:\n        raise ValueError(\"negative subtotal\")\n    if method not in (\"standard\", \"express\"):\n        raise ValueError(\"unknown shipping method\")\n    base_fee = Decimal(\"0\") if amount > FREE_SHIPPING_MINIMUM else STANDARD_FEE\n    return base_fee + (EXPRESS_SURCHARGE if method == \"express\" else Decimal(\"0\"))\n"
+    ]
+  },
+  {
+    "sql": "INSERT INTO sdd_docs(doc_key,kind,path,digest_sha256,body) VALUES(%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE kind=VALUES(kind),path=VALUES(path),digest_sha256=VALUES(digest_sha256),body=VALUES(body)",
+    "args": [
+      "test-target",
+      "test",
+      "tests/test_target.py",
+      "8948335d8fd561720972d0082be7c6b69c4a4c96035def14724ed3480052516b",
+      "import unittest\nfrom decimal import Decimal\nfrom app.shipping import shipping_quote\nclass BoundaryTests(unittest.TestCase):\n    def test_exact_100_standard_is_free(self):\n        self.assertEqual(shipping_quote(\"100.00\"),Decimal(\"0\"))\n    def test_exact_100_express_only_surcharge(self):\n        self.assertEqual(shipping_quote(\"100.00\",\"express\"),Decimal(\"12\"))\n"
+    ]
+  },
+  {
+    "sql": "INSERT INTO sdd_docs(doc_key,kind,path,digest_sha256,body) VALUES(%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE kind=VALUES(kind),path=VALUES(path),digest_sha256=VALUES(digest_sha256),body=VALUES(body)",
+    "args": [
+      "test-regression",
+      "test",
+      "tests/test_regression.py",
+      "a55a148ed92f33c7a421fd0c009b73a91ef268176c8d9f07e5b32c36e17dbb32",
+      "import unittest\nfrom decimal import Decimal\nfrom app.shipping import shipping_quote\nclass RegressionTests(unittest.TestCase):\n    def test_below_threshold(self):\n        self.assertEqual(shipping_quote(\"99.99\"),Decimal(\"8\"))\n    def test_above_threshold(self):\n        self.assertEqual(shipping_quote(\"100.01\"),Decimal(\"0\"))\n    def test_express_below_threshold(self):\n        self.assertEqual(shipping_quote(\"20\",\"express\"),Decimal(\"20\"))\n    def test_bad_method(self):\n        with self.assertRaises(ValueError): shipping_quote(\"50\",\"teleport\")\n    def test_negative(self):\n        with self.assertRaises(ValueError): shipping_quote(\"-1\")\n"
+    ]
+  },
+  {
+    "sql": "SELECT doc_key,kind,path,digest_sha256,body FROM sdd_docs WHERE kind IN ('spec','code','test') ORDER BY doc_key",
+    "args": []
+  }
+]

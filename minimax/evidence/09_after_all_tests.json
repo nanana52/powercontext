@@ -1,0 +1,8 @@
+{
+  "command": "/workspaces/powercontext/minimax/.venv/bin/python -m unittest discover -s tests -p test_*.py -v",
+  "exit_code": 0,
+  "code_sha256": "e804dcf8e025012e9dce2155b7b65923450254cf8820b43c646b7fee5646477b",
+  "stdout": "",
+  "stderr": "test_above_threshold (test_regression.RegressionTests.test_above_threshold) ... ok\ntest_bad_method (test_regression.RegressionTests.test_bad_method) ... ok\ntest_below_threshold (test_regression.RegressionTests.test_below_threshold) ... ok\ntest_express_below_threshold (test_regression.RegressionTests.test_express_below_threshold) ... ok\ntest_negative (test_regression.RegressionTests.test_negative) ... ok\ntest_exact_100_express_only_surcharge (test_target.BoundaryTests.test_exact_100_express_only_surcharge) ... ok\ntest_exact_100_standard_is_free (test_target.BoundaryTests.test_exact_100_standard_is_free) ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.007s\n\nOK\n",
+  "timestamp_utc": "2026-10-31T06:41:41.703455+00:00"
+}

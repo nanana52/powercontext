@@ -1,0 +1,22 @@
+{
+  "updated_spec_from_seekdb": "# Shipping policy (active specification, revision 2)\n\n- SPEC-SHIP-001: For subtotal **>= CNY 100.00**, standard shipping costs CNY 0.\n- SPEC-SHIP-002: For subtotal < CNY 100.00, standard shipping costs CNY 8.\n- SPEC-SHIP-003: Express shipping adds CNY 12 to the applicable standard fee.\n- SPEC-SHIP-004: Negative subtotal and unknown shipping methods raise ValueError.\n- SPEC-SHIP-005: Keep the public `shipping_quote(subtotal, method=\"standard\")` API\n  and Decimal output unchanged.\nThe archived policy is obsolete. Fix the inclusive boundary without changing other behaviors.\n\nSPEC-SHIP-006: Demo spec update evidence tag SDD-UPDATE-2026.\n",
+  "has_new_revision": true,
+  "context_source_hashes": [
+    {
+      "path": "app/shipping.py",
+      "sha256": "adc8482d6dfba9db6cf837ecf0f93393daecb957ea656c59c1333d52381fb629"
+    },
+    {
+      "path": "specs/shipping.md",
+      "sha256": "d85655492114ff734d523e658395e0517493d7b32b5fbc4c4c60595d828764b8"
+    },
+    {
+      "path": "tests/test_regression.py",
+      "sha256": "a55a148ed92f33c7a421fd0c009b73a91ef268176c8d9f07e5b32c36e17dbb32"
+    },
+    {
+      "path": "tests/test_target.py",
+      "sha256": "8948335d8fd561720972d0082be7c6b69c4a4c96035def14724ed3480052516b"
+    }
+  ]
+}

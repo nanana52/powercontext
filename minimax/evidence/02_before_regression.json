@@ -1,0 +1,8 @@
+{
+  "command": "/workspaces/powercontext/minimax/.venv/bin/python -m unittest tests.test_regression -v",
+  "exit_code": 0,
+  "code_sha256": "adc8482d6dfba9db6cf837ecf0f93393daecb957ea656c59c1333d52381fb629",
+  "stdout": "",
+  "stderr": "test_above_threshold (tests.test_regression.RegressionTests.test_above_threshold) ... ok\ntest_bad_method (tests.test_regression.RegressionTests.test_bad_method) ... ok\ntest_below_threshold (tests.test_regression.RegressionTests.test_below_threshold) ... ok\ntest_express_below_threshold (tests.test_regression.RegressionTests.test_express_below_threshold) ... ok\ntest_negative (tests.test_regression.RegressionTests.test_negative) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.001s\n\nOK\n",
+  "timestamp_utc": "2026-10-31T06:41:30.401497+00:00"
+}

@@ -1,0 +1,20 @@
+{
+  "memory_result": {
+    "changed": true,
+    "records": [
+      {
+        "artifact": {
+          "family": "atomic-memory",
+          "artifact_id": "art_938eda4e5cdb4d63a3380f152810d86e",
+          "revision": 1
+        },
+        "kind": "decision",
+        "text": "BOUNDARY2026 completed. MiniMax-M2.5 returned source patch and it was applied. Target and regression tests are green; current source SHA256 e804dcf8e025012e9dce2155b7b65923450254cf8820b43c646b7fee5646477b.",
+        "state": "active",
+        "state_version": 0,
+        "merged_into_id": null
+      }
+    ]
+  },
+  "timestamp_utc": "2026-10-31T06:41:41.829998+00:00"
+}

@@ -1,0 +1,29 @@
+{
+  "scope": {
+    "scope_id": "scp_3zkrbhz5jceww8wbyqabc3hst0",
+    "title": "MiniMax SDD shipping task",
+    "summary": "Task continuity for code change acceptance",
+    "parent_scope_id": null,
+    "context_references": [],
+    "external_references": [],
+    "version": 1
+  },
+  "memory_result": {
+    "changed": true,
+    "records": [
+      {
+        "artifact": {
+          "family": "atomic-memory",
+          "artifact_id": "art_265f76963fb14064bb5d4516a36f0813",
+          "revision": 1
+        },
+        "kind": "decision",
+        "text": "BOUNDARY2026 task opened. Before MiniMax edit: inclusive boundary tests fail on incorrect quote, regression tests pass.",
+        "state": "active",
+        "state_version": 0,
+        "merged_into_id": null
+      }
+    ]
+  },
+  "timestamp_utc": "2026-10-31T06:41:35.506976+00:00"
+}

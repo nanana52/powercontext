@@ -1,0 +1,19 @@
+{
+  "provider": "MiniMax",
+  "model": "MiniMax-M3",
+  "endpoint": "https://api.minimaxi.com/v1/text/chatcompletion_v2",
+  "request_id": "0734c0a31c2c6fa2e6545a7034b09b06",
+  "usage": {
+    "total_tokens": 1588,
+    "total_characters": 0,
+    "prompt_tokens": 1409,
+    "completion_tokens": 179,
+    "completion_tokens_details": {
+      "reasoning_tokens": 124
+    },
+    "prompt_tokens_details": {
+      "cached_tokens": 183
+    }
+  },
+  "content": "{\"old_line\":\"    base_fee = Decimal(\\\"0\\\") if amount > FREE_SHIPPING_MINIMUM else STANDARD_FEE\",\"new_line\":\"    base_fee = Decimal(\\\"0\\\") if amount >= FREE_SHIPPING_MINIMUM else STANDARD_FEE\"}"
+}

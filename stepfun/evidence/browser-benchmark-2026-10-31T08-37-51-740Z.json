@@ -1,0 +1,395 @@
+{
+  "source": "stepfun-browser-benchmark-v1",
+  "startedAt": "2026-10-31T08:37:41.552Z",
+  "environment": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:159.0) Gecko/20100101 Firefox/159.0",
+    "webgpuDetected": false,
+    "secureContext": true,
+    "online": true,
+    "browserLanguage": "zh-CN"
+  },
+  "model": {
+    "id": "Xenova/all-MiniLM-L6-v2",
+    "dimensions": 384,
+    "pooling": "mean",
+    "normalized": true,
+    "runtime": "Transformers.js 3.8.1"
+  },
+  "settings": {
+    "knowledgeBase": "bench_mvw5en8w",
+    "texts": 16,
+    "queries": 8,
+    "topK": 3,
+    "eval": "binary Recall@3 and nDCG@3 (fixed relevance judgments)",
+    "coldWarm": "first query separated; warm median of remaining queries"
+  },
+  "configurations": [
+    {
+      "variant": "fp32-wasm",
+      "dtype": "fp32",
+      "device": "wasm",
+      "modelLoadMs": 698,
+      "modelLoadCached": false,
+      "batchSize": 1,
+      "modelSize": {
+        "bytes": 90387606,
+        "mb": 90.39,
+        "source": "HTTP HEAD Content-Length",
+        "url": "/models/Xenova/all-MiniLM-L6-v2/onnx/model.onnx"
+      },
+      "documentCount": 16,
+      "queryDetails": [
+        {
+          "queryId": "q1",
+          "query": "How does hybrid vector and keyword database search work?",
+          "relevant": [
+            "hybrid",
+            "seekdb"
+          ],
+          "returnedIds": [
+            "hybrid",
+            "seekdb",
+            "index"
+          ],
+          "queryEmbeddingMs": 25,
+          "seekdbMs": 4.3,
+          "endToEndMs": 292,
+          "recallAt3": 1,
+          "ndcgAt3": 1,
+          "cold": true
+        },
+        {
+          "queryId": "q2",
+          "query": "What is the browser GPU acceleration backend for embedding?",
+          "relevant": [
+            "webgpu",
+            "onnx"
+          ],
+          "returnedIds": [
+            "wasm",
+            "security",
+            "webgpu"
+          ],
+          "queryEmbeddingMs": 38,
+          "seekdbMs": 4.3,
+          "endToEndMs": 285,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.3065735963827292,
+          "cold": false
+        },
+        {
+          "queryId": "q3",
+          "query": "What if WebGPU is unavailable and inference must still run locally?",
+          "relevant": [
+            "wasm",
+            "privacy"
+          ],
+          "returnedIds": [
+            "webgpu",
+            "wasm",
+            "onnx"
+          ],
+          "queryEmbeddingMs": 22,
+          "seekdbMs": 3.9,
+          "endToEndMs": 380,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.38685280723454163,
+          "cold": false
+        },
+        {
+          "queryId": "q4",
+          "query": "How do 8 bit quantized models reduce file size?",
+          "relevant": [
+            "quant",
+            "fp16"
+          ],
+          "returnedIds": [
+            "quant",
+            "fp16",
+            "batch"
+          ],
+          "queryEmbeddingMs": 31,
+          "seekdbMs": 4.1,
+          "endToEndMs": 276,
+          "recallAt3": 1,
+          "ndcgAt3": 1,
+          "cold": false
+        },
+        {
+          "queryId": "q5",
+          "query": "How can a newly added document be found after index refresh?",
+          "relevant": [
+            "index",
+            "increment"
+          ],
+          "returnedIds": [
+            "index",
+            "increment",
+            "metadata"
+          ],
+          "queryEmbeddingMs": 25,
+          "seekdbMs": 3.8,
+          "endToEndMs": 294,
+          "recallAt3": 1,
+          "ndcgAt3": 1,
+          "cold": false
+        },
+        {
+          "queryId": "q6",
+          "query": "Why measure warm latency and use a median instead of the fastest result?",
+          "relevant": [
+            "cold",
+            "batch"
+          ],
+          "returnedIds": [
+            "cold",
+            "metric",
+            "quant"
+          ],
+          "queryEmbeddingMs": 32,
+          "seekdbMs": 4.2,
+          "endToEndMs": 274,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.6131471927654584,
+          "cold": false
+        },
+        {
+          "queryId": "q7",
+          "query": "How can we compare retrieval quality using ranking metrics?",
+          "relevant": [
+            "metric",
+            "quant"
+          ],
+          "returnedIds": [
+            "batch",
+            "hybrid",
+            "seekdb"
+          ],
+          "queryEmbeddingMs": 29,
+          "seekdbMs": 3.7,
+          "endToEndMs": 293,
+          "recallAt3": 0,
+          "ndcgAt3": 0,
+          "cold": false
+        },
+        {
+          "queryId": "q8",
+          "query": "Where is the raw text and vector metadata stored?",
+          "relevant": [
+            "metadata",
+            "isolation"
+          ],
+          "returnedIds": [
+            "metadata",
+            "privacy",
+            "increment"
+          ],
+          "queryEmbeddingMs": 25,
+          "seekdbMs": 3.9,
+          "endToEndMs": 415,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.6131471927654584,
+          "cold": false
+        }
+      ],
+      "documentEmbeddingMs": 718,
+      "embeddingThroughputDocsPerSec": 22.28,
+      "writeMs": 230.6,
+      "indexVisibilityMs": 16.4,
+      "recallAt3": 0.625,
+      "ndcgAt3": 0.615,
+      "firstQueryMs": 292,
+      "warmMedianSeekdbMs": 3.9,
+      "warmMedianE2eMs": 293,
+      "warmMedianQueryEmbeddingMs": 29
+    },
+    {
+      "variant": "q8-wasm",
+      "dtype": "q8",
+      "device": "wasm",
+      "modelLoadMs": 209,
+      "modelLoadCached": false,
+      "batchSize": 8,
+      "modelSize": {
+        "bytes": 22972370,
+        "mb": 22.97,
+        "source": "HTTP HEAD Content-Length",
+        "url": "/models/Xenova/all-MiniLM-L6-v2/onnx/model_quantized.onnx"
+      },
+      "documentCount": 16,
+      "queryDetails": [
+        {
+          "queryId": "q1",
+          "query": "How does hybrid vector and keyword database search work?",
+          "relevant": [
+            "hybrid",
+            "seekdb"
+          ],
+          "returnedIds": [
+            "hybrid",
+            "seekdb",
+            "index"
+          ],
+          "queryEmbeddingMs": 24,
+          "seekdbMs": 4.3,
+          "endToEndMs": 360,
+          "recallAt3": 1,
+          "ndcgAt3": 1,
+          "cold": true
+        },
+        {
+          "queryId": "q2",
+          "query": "What is the browser GPU acceleration backend for embedding?",
+          "relevant": [
+            "webgpu",
+            "onnx"
+          ],
+          "returnedIds": [
+            "wasm",
+            "security",
+            "webgpu"
+          ],
+          "queryEmbeddingMs": 28,
+          "seekdbMs": 6.5,
+          "endToEndMs": 687,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.3065735963827292,
+          "cold": false
+        },
+        {
+          "queryId": "q3",
+          "query": "What if WebGPU is unavailable and inference must still run locally?",
+          "relevant": [
+            "wasm",
+            "privacy"
+          ],
+          "returnedIds": [
+            "webgpu",
+            "wasm",
+            "onnx"
+          ],
+          "queryEmbeddingMs": 22,
+          "seekdbMs": 3.8,
+          "endToEndMs": 465,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.38685280723454163,
+          "cold": false
+        },
+        {
+          "queryId": "q4",
+          "query": "How do 8 bit quantized models reduce file size?",
+          "relevant": [
+            "quant",
+            "fp16"
+          ],
+          "returnedIds": [
+            "quant",
+            "fp16",
+            "isolation"
+          ],
+          "queryEmbeddingMs": 14,
+          "seekdbMs": 3.5,
+          "endToEndMs": 255,
+          "recallAt3": 1,
+          "ndcgAt3": 1,
+          "cold": false
+        },
+        {
+          "queryId": "q5",
+          "query": "How can a newly added document be found after index refresh?",
+          "relevant": [
+            "index",
+            "increment"
+          ],
+          "returnedIds": [
+            "index",
+            "increment",
+            "metadata"
+          ],
+          "queryEmbeddingMs": 27,
+          "seekdbMs": 3.7,
+          "endToEndMs": 273,
+          "recallAt3": 1,
+          "ndcgAt3": 1,
+          "cold": false
+        },
+        {
+          "queryId": "q6",
+          "query": "Why measure warm latency and use a median instead of the fastest result?",
+          "relevant": [
+            "cold",
+            "batch"
+          ],
+          "returnedIds": [
+            "cold",
+            "metric",
+            "hybrid"
+          ],
+          "queryEmbeddingMs": 16,
+          "seekdbMs": 4.8,
+          "endToEndMs": 395,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.6131471927654584,
+          "cold": false
+        },
+        {
+          "queryId": "q7",
+          "query": "How can we compare retrieval quality using ranking metrics?",
+          "relevant": [
+            "metric",
+            "quant"
+          ],
+          "returnedIds": [
+            "batch",
+            "metric",
+            "hybrid"
+          ],
+          "queryEmbeddingMs": 15,
+          "seekdbMs": 7.1,
+          "endToEndMs": 364,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.38685280723454163,
+          "cold": false
+        },
+        {
+          "queryId": "q8",
+          "query": "Where is the raw text and vector metadata stored?",
+          "relevant": [
+            "metadata",
+            "isolation"
+          ],
+          "returnedIds": [
+            "metadata",
+            "privacy",
+            "increment"
+          ],
+          "queryEmbeddingMs": 10,
+          "seekdbMs": 4.8,
+          "endToEndMs": 259,
+          "recallAt3": 0.5,
+          "ndcgAt3": 0.6131471927654584,
+          "cold": false
+        }
+      ],
+      "documentEmbeddingMs": 446,
+      "embeddingThroughputDocsPerSec": 35.87,
+      "writeMs": 34.6,
+      "indexVisibilityMs": 11.4,
+      "recallAt3": 0.6875,
+      "ndcgAt3": 0.6633,
+      "firstQueryMs": 360,
+      "warmMedianSeekdbMs": 4.8,
+      "warmMedianE2eMs": 364,
+      "warmMedianQueryEmbeddingMs": 16
+    }
+  ],
+  "skipped": [],
+  "completedAt": "2026-10-31T08:37:51.679Z",
+  "comparison": {
+    "throughputSpeedup": 1.61,
+    "recallDelta": 0.0625,
+    "ndcgDelta": 0.0483,
+    "modelSizeReferenceRatio": 3.93,
+    "note": "modelSizeReferenceRatio uses model repository listing; not benchmark device measurements."
+  }
+}

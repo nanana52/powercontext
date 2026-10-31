@@ -1,0 +1,3 @@
+Incremental indexing smoke-test: Stellar seahorses store local embeddings in seekdb.
+
+This text can be imported after the sample dataset to demonstrate that a fresh document is retrievable after database index visibility verification.

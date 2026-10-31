@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fieldnotes · 端侧知识检索实验室</title>
+  <meta name="description" content="浏览器本地向量化，seekdb 内混合检索：阶跃星辰生态伙伴赛题演示项目。" />
+  <link rel="stylesheet" href="/web/style.css" />
+</head><body>
+  <div class="page">
+    <header class="masthead">
+      <a class="brand" href="#top" aria-label="Fieldnotes 首页"><span class="brand-emblem">F<span>•</span></span><span class="brand-text">FIELDNOTES<small>THE LOCAL INTELLIGENCE LAB</small></span></a>
+      <div class="masthead-right"><span class="issue">2026 · VOL. 01 / STEP FUN × SEEKDB</span><span class="pill" id="dbState">seekdb · 连接中</span></div>
+    </header>
+    <section id="top" class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="circle-dot"></span> EDGE AI / PRIVATE KNOWLEDGE</div>
+        <h1>把知识，<br/><em>留在设备上。</em></h1>
+        <p class="hero-description">无需云端推理。文档在你的浏览器里变成向量，之后交给真正的 seekdb 完成语义与全文混合检索。</p>
+        <div class="hero-actions">
+          <button class="btn-primary" id="sampleBtn"><span>↗</span> 导入演示语料</button>
+          <a class="btn-link" href="#bench">查看性能实验 <span>↗</span></a>
+        </div>
+      </div>
+      <div class="scene" aria-label="从浏览器文档向量化到 seekdb 检索的流程图">
+        <div class="scene-grid"></div>
+        <div class="scene-orbit orbit-large"></div><div class="scene-orbit orbit-small"></div>
+        <div class="scene-star star-a">✳</div><div class="scene-star star-b">✦</div>
+        <div class="scene-note note-one"><span class="micro">01 / LOCAL</span><b>Browser</b><small>Embedding</small><i>384 dimensions</i></div>
+        <div class="scene-center"><div class="beacon"><span>✳</span></div><div class="signal-line"></div><div class="signal-line line-b"></div></div>
+        <div class="scene-note note-two"><span class="micro">02 / INDEX</span><b>seekdb</b><small>Vector × Full-text</small><i>RRF hybrid rank</i></div>
+        <div class="scene-footnote">NO CLOUD INFERENCE · NO CLIENT-SIDE RERANK</div>
+      </div>
+    </section>
+
+    <div class="stripe"><span>LIVE SYSTEM</span><span class="stripe-detail">LOCAL EMBEDDING <b>✳</b> SEEKDB HYBRID SEARCH <b>✳</b> QUANTIZATION BENCHMARK</span><span id="gpuState">检测 WebGPU…</span></div>
+
+    <main class="workspace">
+      <section class="intro-row">
+        <div><div class="eyebrow muted">YOUR WORKSPACE / 01</div><h2>从资料到答案。</h2></div>
+        <p>选择知识库与推理精度。精度不同会使用独立 seekdb 集合，不会将不兼容的向量混放。</p>
+      </section>
+      <div class="setup-bar">
+        <label>知识库名称 <input id="kbName" maxlength="24" autocomplete="off" aria-label="知识库名称" /></label>
+        <label>运行模式 <select id="modeSelect" aria-label="运行模式"><option value="auto">自动：优先 WebGPU，失败降级 WASM</option><option value="q8-wasm">INT8 / WASM（量化）</option><option value="fp32-wasm">FP32 / WASM（基线）</option><option value="fp16-webgpu">FP16 / WebGPU（需支持）</option></select></label>
+        <div class="set-metric"><small>推理后端</small><b id="backend">—</b></div>
+        <div class="set-metric"><small>当前精度</small><b id="precision">—</b></div>
+        <div class="set-metric"><small>已存文档</small><b id="docCount">—</b></div>
+      </div>
+      <div class="cards-two">
+        <section class="panel import-panel">
+          <div class="panel-title"><span class="panel-index">01</span><div><h3>导入 · Encode</h3><p>文件在浏览器本地计算 embedding</p></div><span class="panel-mark">↙</span></div>
+          <div class="upload-zone"><div class="upload-icon">⇧</div><p>选择文本文件</p><span>支持 .txt / .md，自动分段，连续导入</span><input type="file" id="files" accept=".txt,.md,text/plain,text/markdown" multiple aria-label="上传文本文件" /></div>
+          <button class="btn-primary full" id="uploadBtn">将选择的文件写入 seekdb <span>↗</span></button>
+          <div class="minor-stats"><span>向量化 / 写入 / 索引可见性：<strong id="lastImport">尚未导入</strong></span><span>端到端：<strong id="lastTotal">—</strong></span></div>
+        </section>
+        <section class="panel search-panel">
+          <div class="panel-title"><span class="panel-index">02</span><div><h3>查询 · Retrieve</h3><p>单次 seekdb 混合检索，数据库内 RRF 排序</p></div><span class="panel-mark">↗</span></div>
+          <label class="text-label" for="query">你想找到什么？</label>
+          <textarea id="query" rows="3" placeholder="例如：How does vector search work with keyword indexing?"></textarea>
+          <button class="btn-dark full" id="searchBtn">执行向量 × 全文混合检索 <span>↗</span></button>
+          <div class="minor-stats"><span id="queryTiming">等待首次检索…</span></div>
+        </section>
+      </div>
+      <section class="results-section"><div class="section-head"><div><div class="eyebrow muted">DATABASE RANKING / 02</div><h2>检索结果 <sup>RRF</sup></h2></div><p>排序来自 seekdb.hybridSearch，不在浏览器中拼接两路结果。</p></div><div id="results" class="results"><div class="empty">还没有检索结果。先点击顶部「导入演示语料」，然后执行查询。</div></div></section>
+      <section class="benchmark" id="bench"><div class="section-head"><div><div class="eyebrow muted">QUANTIZATION STUDY / 03</div><h2>量化与性能实验。</h2></div><p>相同语料与查询，分别测量 FP32、INT8/WASM；支持时增加 FP16/WebGPU。所有数值从真实浏览器运行采集。</p></div>
+        <div class="bench-action"><div><b>固定语料 · 固定评测集 · 实测对比</b><small>首次模型加载和热请求分开记录；报告保存在 stepfun/evidence/</small></div><button class="btn-primary" id="benchBtn">运行完整实验 ↗</button></div>
+        <div class="table-scroll"><table><thead><tr><th>模型与后端</th><th>模型文件大小*</th><th>向量化吞吐</th><th>seekdb 热查询</th><th>端到端热查询</th><th>Recall@3 / nDCG@3</th></tr></thead><tbody id="benchRows"><tr><td colspan="6" class="no-results">尚无真实评测数据。点击上方运行。</td></tr></tbody></table></div>
+        <div class="bench-bottom"><small id="benchNote">* 文件大小优先通过 HTTP HEAD 实测；无法测得时留空，不把估算值当实测。</small><button class="text-button" id="downloadBtn">下载原始 JSON ↓</button></div>
+      </section>
+      <section class="status-panel"><div class="status-left"><div id="spinner" class="pulse">✳</div><div><h3>运行日志 <span>LIVE</span></h3><p id="statusMessage">等待数据库连接…</p></div></div><div id="log" class="log" aria-live="polite"></div></section>
+    </main>
+    <footer><span>FIELDNOTES / STEP FUN × SEEKDB</span><span>ALL EMBEDDINGS ON DEVICE · ALL RETRIEVAL INSIDE SEEKDB</span><span>BUILD 2026.10</span></footer>
+  </div>
+  <script type="module" src="/web/app.js"></script>
+</body></html>

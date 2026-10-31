@@ -1,0 +1,19 @@
+node_modules/
+.data/
+dist/
+.DS_Store
+*.log
+.env
+.env.*
+!*.example
+
+# Local model weights: downloaded during setup, never commit
+/public/models/
+
+# Unused native bindings from prior dependency troubleshooting
+/vendor/
+
+# Backups made while debugging
+*.backup
+*.before-local
+*.size-backup

@@ -1,0 +1,10 @@
+[
+  {"id":"q1","text":"How does hybrid vector and keyword database search work?","relevant":["hybrid","seekdb"]},
+  {"id":"q2","text":"What is the browser GPU acceleration backend for embedding?","relevant":["webgpu","onnx"]},
+  {"id":"q3","text":"What if WebGPU is unavailable and inference must still run locally?","relevant":["wasm","privacy"]},
+  {"id":"q4","text":"How do 8 bit quantized models reduce file size?","relevant":["quant","fp16"]},
+  {"id":"q5","text":"How can a newly added document be found after index refresh?","relevant":["index","increment"]},
+  {"id":"q6","text":"Why measure warm latency and use a median instead of the fastest result?","relevant":["cold","batch"]},
+  {"id":"q7","text":"How can we compare retrieval quality using ranking metrics?","relevant":["metric","quant"]},
+  {"id":"q8","text":"Where is the raw text and vector metadata stored?","relevant":["metadata","isolation"]}
+]

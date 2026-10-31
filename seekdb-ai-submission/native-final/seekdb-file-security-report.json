@@ -1,0 +1,78 @@
+{
+  "tests": [
+    {
+      "name": "Session default file SQL off",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "0",
+      "stderr": ""
+    },
+    {
+      "name": "Ordinary SQL literal preserved",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "read_csv(",
+      "stderr": ""
+    },
+    {
+      "name": "File reads refused while disabled",
+      "passed": true,
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "ERROR 1235 (0A000) at line 1: Not supported feature or function"
+    },
+    {
+      "name": "SET SESSION ON visible in one connection",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "1",
+      "stderr": ""
+    },
+    {
+      "name": "SET SESSION OFF visible in one connection",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "0",
+      "stderr": ""
+    },
+    {
+      "name": "Session doesn't leak between client connections",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "0",
+      "stderr": ""
+    },
+    {
+      "name": "Global enable_file_sql is not silently enabled",
+      "passed": true,
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "ERROR 1193 (HY000) at line 1: Unknown system variable 'enable_file_sql'"
+    },
+    {
+      "name": "File reading allowed by BOTH roots",
+      "passed": true,
+      "returncode": 0,
+      "stdout": "2",
+      "stderr": ""
+    },
+    {
+      "name": "Symlink escape always refused",
+      "passed": true,
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "COPY outside root refused",
+      "passed": true,
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    }
+  ],
+  "port": 2890,
+  "data_root": "/tmp/seekdb-file-security-228072",
+  "secure_file_priv": "/",
+  "success": true
+}

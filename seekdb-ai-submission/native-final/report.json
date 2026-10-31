@@ -1,0 +1,301 @@
+{
+  "instance": "/tmp/seekdb-official-compat-2891-3kq28acs",
+  "port": 2891,
+  "checks": [
+    {
+      "name": "file CSV rows",
+      "pass": true,
+      "exit": 0,
+      "output": "1\tAlice\n2\tBob, Inc.\n3\tCharlie",
+      "stderr": ""
+    },
+    {
+      "name": "file CSV numeric aggregate",
+      "pass": true,
+      "exit": 0,
+      "output": "6.75",
+      "stderr": ""
+    },
+    {
+      "name": "JSON rows",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "NDJSON rows",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "SQL native file JOIN",
+      "pass": true,
+      "exit": 0,
+      "output": "Alice\tA\nBob, Inc.\tB",
+      "stderr": ""
+    },
+    {
+      "name": "glob lists local CSV",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "file path traversal rejected",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1210 (HY000) at line 1: Invalid argument",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "normal SQL unaffected",
+      "pass": true,
+      "exit": 0,
+      "output": "1",
+      "stderr": ""
+    },
+    {
+      "name": "COPY create destination table",
+      "pass": true,
+      "exit": 0,
+      "output": "",
+      "stderr": ""
+    },
+    {
+      "name": "COPY CSV FROM source",
+      "pass": true,
+      "exit": 0,
+      "output": "",
+      "stderr": ""
+    },
+    {
+      "name": "COPY FROM persisted rows",
+      "pass": true,
+      "exit": 0,
+      "output": "3\t6.75",
+      "stderr": ""
+    },
+    {
+      "name": "COPY query TO CSV",
+      "pass": true,
+      "exit": 0,
+      "output": "",
+      "stderr": ""
+    },
+    {
+      "name": "COPY headerless output can be read (first line treated as CSV header)",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "COPY refuses overwrite",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1210 (HY000) at line 1: Invalid argument",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "COPY protects outside path",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1210 (HY000) at line 1: Invalid argument",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "Parquet official fixture COUNT MIN MAX SUM",
+      "pass": true,
+      "exit": 0,
+      "output": "7\t0\t6\t21",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet official fixture WHERE",
+      "pass": true,
+      "exit": 0,
+      "output": "4",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet multi-rowgroup nullable COUNT SUM",
+      "pass": true,
+      "exit": 0,
+      "output": "6\t4\t56",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet multi-rowgroup strings",
+      "pass": true,
+      "exit": 0,
+      "output": "6",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet page v2 nullable",
+      "pass": true,
+      "exit": 0,
+      "output": "6\t4",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet dictionary encoding",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet+CSV native SQL JOIN",
+      "pass": true,
+      "exit": 0,
+      "output": "3",
+      "stderr": ""
+    },
+    {
+      "name": "Parquet rejects missing files",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1210 (HY000) at line 1: Invalid argument",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "Official CSV inferred id sum, double avg and boolean sum",
+      "pass": true,
+      "exit": 0,
+      "output": "3\t6\t91.92\t2",
+      "stderr": ""
+    },
+    {
+      "name": "Official CSV duplicate header id__2",
+      "pass": true,
+      "exit": 0,
+      "output": "1\t101\n2\t102\n3\t103",
+      "stderr": ""
+    },
+    {
+      "name": "Official CSV DATE type",
+      "pass": true,
+      "exit": 0,
+      "output": "2026-08-01\t2026-08-03",
+      "stderr": ""
+    },
+    {
+      "name": "Official CSV DATETIME type with T delimiter",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "Official CSV multiline and escaped quote",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "Official JSONL union schema with named format",
+      "pass": true,
+      "exit": 0,
+      "output": "3\t2\t1\t2",
+      "stderr": ""
+    },
+    {
+      "name": "Official JSONL alias and WHERE",
+      "pass": true,
+      "exit": 0,
+      "output": "2",
+      "stderr": ""
+    },
+    {
+      "name": "Read CSV without header names",
+      "pass": true,
+      "exit": 0,
+      "output": "4",
+      "stderr": ""
+    },
+    {
+      "name": "Sample size other than -1 is denied",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1235 (0A000) at line 1: Not supported feature or function",
+      "stderr": "ERROR 1235 (0A000) at line 1: Not supported feature or function"
+    },
+    {
+      "name": "JSONL nested values explicitly denied",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1210 (HY000) at line 1: Invalid argument",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "Official DESCRIBE file SQL metadata",
+      "pass": true,
+      "exit": 0,
+      "output": "id\tBIGINT\tYES\tNULL\tNULL\tNULL\nname\tVARCHAR(4096)\tYES\tNULL\tNULL\tNULL\nscore\tDOUBLE\tYES\tNULL\tNULL\tNULL\nactive\tTINYINT\tYES\tNULL\tNULL\tNULL\nday\tDATE\tYES\tNULL\tNULL\tNULL\ncreated\tDATETIME\tYES\tNULL\tNULL\tNULL\nnote\tVARCHAR(4096)\tYES\tNULL\tNULL\tNULL\nid__2\tBIGINT\tYES\tNULL\tNULL\tNULL",
+      "stderr": ""
+    },
+    {
+      "name": "Official COPY HEADER NULLSTR export",
+      "pass": true,
+      "exit": 0,
+      "output": "",
+      "stderr": ""
+    },
+    {
+      "name": "Official COPY has correct header and 3 data rows",
+      "pass": true,
+      "exit": 0,
+      "output": "3",
+      "stderr": ""
+    },
+    {
+      "name": "Official COPY preserves numeric aggregate on round trip",
+      "pass": true,
+      "exit": 0,
+      "output": "6\t91.92",
+      "stderr": ""
+    },
+    {
+      "name": "COPY HEADER FALSE remains backward compatible",
+      "pass": true,
+      "exit": 0,
+      "output": "",
+      "stderr": ""
+    },
+    {
+      "name": "COPY HEADER refuses existing target",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1210 (HY000) at line 1: Invalid argument",
+      "stderr": "ERROR 1210 (HY000) at line 1: Invalid argument"
+    },
+    {
+      "name": "COPY NULLSTR arbitrary nested expression",
+      "pass": true,
+      "exit": 0,
+      "output": "",
+      "stderr": ""
+    },
+    {
+      "name": "Public test expects positional format syntax error 1064",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your OceanBase version for the right syntax to use near 'SELECT * FROM read_csv('official_basic.csv','xml')' at line 1",
+      "stderr": "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your OceanBase version for the right syntax to use near 'SELECT * FROM read_csv('official_basic.csv','xml')' at line 1"
+    },
+    {
+      "name": "Public test expects unsupported sample size error 1235",
+      "pass": true,
+      "exit": 1,
+      "output": "ERROR 1235 (0A000) at line 1: Not supported feature or function",
+      "stderr": "ERROR 1235 (0A000) at line 1: Not supported feature or function"
+    }
+  ],
+  "success": true
+}

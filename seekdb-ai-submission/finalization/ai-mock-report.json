@@ -1,0 +1,167 @@
+{
+  "target": "127.0.0.1:2891",
+  "tests": [
+    {
+      "test": "SQL 1: basic SELECT",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "1",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 2: AI_PROMPT JSON object",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "OBJECT",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 3: AI_PROMPT JSON array",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "ARRAY",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 4: repeated Unicode template",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "你好 {0} {0}",
+      "stderr": ""
+    },
+    {
+      "test": "Register model: completion",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "test": "Register model: dense_embedding",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "test": "Register model: rerank",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "test": "Register endpoint: smk_c_258580",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "test": "Register endpoint: smk_e_258580",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "test": "Register endpoint: smk_r_258580",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 5: AI_COMPLETE real HTTP",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "MOCK_COMPLETE:hello",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 6: AI_COMPLETE with nested prompt expansion",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "MOCK_COMPLETE:Hello world and world",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 7: AI_EMBED real HTTP",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "[0.1, 0.2, 0.3, 0.4]",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 8: AI_EMBED NULL",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "NULL_OK",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 9: AI_RERANK real HTTP",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "[{\"index\": 0, \"relevance_score\": 1.0}, {\"index\": 1, \"relevance_score\": 0.99}, {\"index\": 2, \"relevance_score\": 0.98}]",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 10: AI_RERANK object ID mapping",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "[{\"id\": \"doc-A\", \"text\": \"apple\", \"_model_score\": 1.0}, {\"id\": \"doc-B\", \"text\": \"banana\", \"_model_score\": 0.99}]",
+      "stderr": ""
+    },
+    {
+      "test": "SQL 11: AI_EMBED cross-row request count",
+      "ok": true,
+      "exit_code": 0,
+      "stdout": "[0.1, 0.2, 0.3, 0.4]\n[0.1, 0.2, 0.3, 0.4]",
+      "stderr": ""
+    }
+  ],
+  "requests": [
+    {
+      "kind": "completion",
+      "count": 1,
+      "path": "/v1/chat/completions"
+    },
+    {
+      "kind": "completion",
+      "count": 1,
+      "path": "/v1/chat/completions"
+    },
+    {
+      "kind": "embedding",
+      "count": 1,
+      "path": "/v1/embeddings"
+    },
+    {
+      "kind": "rerank",
+      "count": 3,
+      "path": "/v1/rerank"
+    },
+    {
+      "kind": "rerank",
+      "count": 2,
+      "path": "/v1/rerank"
+    },
+    {
+      "kind": "embedding",
+      "count": 1,
+      "path": "/v1/embeddings"
+    },
+    {
+      "kind": "embedding",
+      "count": 1,
+      "path": "/v1/embeddings"
+    }
+  ],
+  "embedding_request_sizes": [
+    1,
+    1,
+    1
+  ],
+  "cross_row_batching_demonstrated": false
+}

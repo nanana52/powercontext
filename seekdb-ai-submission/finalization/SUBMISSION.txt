@@ -1,0 +1,13 @@
+seekdb repository: https://github.com/nanana52/seekdb
+seekdb branch: 2026-competition-ai-functions
+seekdb commit SHA: 053002ef71439d46d5b0b72399dd144f46bf35dd
+PowerContext repository: https://github.com/nanana52/powercontext
+PowerContext branch: 2026-competition-ecosystem
+upstream pull request: https://github.com/oceanbase/seekdb/pull/2343
+file SQL local: 42/42 PASS
+security local: 10/10 PASS
+AI mock HTTP SQL exit code: 0 (read ai-mock-report.json)
+STREAM reader: C++ standalone unit PASS; not integrated into FileScan operator
+MISSING: native streaming FileScan, registered enable_file_sql sysvar,
+         full async AI COLUMN DDL+metadata+change-stream+retries+recovery.
+IMPORTANT: Contest platform submission is a separate action.

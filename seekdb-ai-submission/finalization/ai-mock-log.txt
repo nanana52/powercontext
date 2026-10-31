@@ -1,0 +1,33 @@
+PASS SQL 1: basic SELECT
+  output: 1
+PASS SQL 2: AI_PROMPT JSON object
+  output: OBJECT
+PASS SQL 3: AI_PROMPT JSON array
+  output: ARRAY
+PASS SQL 4: repeated Unicode template
+  output: 你好 {0} {0}
+PASS Register model: completion
+PASS Register model: dense_embedding
+PASS Register model: rerank
+PASS Register endpoint: smk_c_258580
+PASS Register endpoint: smk_e_258580
+PASS Register endpoint: smk_r_258580
+PASS SQL 5: AI_COMPLETE real HTTP
+  output: MOCK_COMPLETE:hello
+PASS SQL 6: AI_COMPLETE with nested prompt expansion
+  output: MOCK_COMPLETE:Hello world and world
+PASS SQL 7: AI_EMBED real HTTP
+  output: [0.1, 0.2, 0.3, 0.4]
+PASS SQL 8: AI_EMBED NULL
+  output: NULL_OK
+PASS SQL 9: AI_RERANK real HTTP
+  output: [{"index": 0, "relevance_score": 1.0}, {"index": 1, "relevance_score": 0.99}, {"index": 2, "relevance_score": 0.98}]
+PASS SQL 10: AI_RERANK object ID mapping
+  output: [{"id": "doc-A", "text": "apple", "_model_score": 1.0}, {"id": "doc-B", "text": "banana", "_model_score": 0.99}]
+PASS SQL 11: AI_EMBED cross-row request count
+  output: [0.1, 0.2, 0.3, 0.4]
+[0.1, 0.2, 0.3, 0.4]
+Embedding HTTP batch sizes: [1, 1, 1]
+KNOWN GAP: SQL cross-row AI_EMBED batching not yet proven.
+DONE: real SQL + local Mock HTTP smoke suite completed.
+Report saved: /workspaces/seekdb-finalization/ai-mock-results.json

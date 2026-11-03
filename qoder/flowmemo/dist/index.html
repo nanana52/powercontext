@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowMemo — 会记忆的周报工作台</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="topbar">
+  <div class="topbar-logo">Flow<span>Memo</span></div>
+  <div class="topbar-project">
+    <select id="projectSelect"></select>
+  </div>
+  <div class="topbar-actions">
+    <div id="memoryBadge" class="memory-badge disconnected">
+      <span class="dot"></span>检测中...
+    </div>
+    <button id="btnImport" class="btn btn-primary">载入演示</button>
+  </div>
+</header>
+
+<!-- KPI Row -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-label">记录数</div>
+    <div class="kpi-value" id="kpiNotes">0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">待办数</div>
+    <div class="kpi-value" id="kpiTasks">0</div>
+  </div>
+  <div class="kpi-card done">
+    <div class="kpi-label">已完成</div>
+    <div class="kpi-value" id="kpiDone">0</div>
+  </div>
+  <div class="kpi-card risk">
+    <div class="kpi-label">风险数</div>
+    <div class="kpi-value" id="kpiRisks">0</div>
+  </div>
+</div>
+
+<!-- Main Workspace -->
+<div class="workspace">
+
+  <!-- Left: Notes -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">会议记录</span>
+    </div>
+    <div class="panel-body">
+      <div class="note-form">
+        <input type="text" id="noteTitle" class="note-title-input" placeholder="记录标题（如：例会记录 C）">
+        <textarea id="noteContent" class="note-input" placeholder="输入会议记录内容...&#10;&#10;支持格式：&#10;待办：某人 在 YYYY-MM-DD 前完成某事，优先级高&#10;决定：某项决策内容&#10;风险：某项风险描述"></textarea>
+        <div class="note-form-actions">
+          <button id="btnAddNote" class="btn btn-primary">添加记录</button>
+        </div>
+      </div>
+      <div class="section-label">已有记录</div>
+      <div id="notesList"></div>
+    </div>
+  </div>
+
+  <!-- Middle: Tasks / Decisions / Risks -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">任务面板</span>
+    </div>
+    <div class="panel-body">
+      <div class="section-label">待办事项 <small style="color:var(--text-muted)">（点击左侧圆点切换完成）</small></div>
+      <div id="tasksList"></div>
+
+      <div class="section-label">决策</div>
+      <div id="decisionsList"></div>
+
+      <div class="section-label">风险</div>
+      <div id="risksList"></div>
+    </div>
+  </div>
+
+  <!-- Right: Report -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">周报预览</span>
+      <div class="report-actions">
+        <button id="btnGenerate" class="btn btn-primary btn-sm">生成周报</button>
+        <button id="btnCopy" class="btn btn-sm">复制</button>
+        <button id="btnDownload" class="btn btn-sm">下载 MD</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div id="reportContent">
+        <div class="empty-state">点击「生成周报」按钮创建</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Memory Section -->
+<div class="memory-section">
+  <div class="memory-card">
+    <h3>长期记忆 (PowerContext)</h3>
+    <div id="memoryStatusText" class="memory-status info">检测 PowerContext 连接状态中...</div>
+    <div class="memory-input-row">
+      <input type="text" id="memoryInput" class="memory-input"
+             placeholder="保存写作偏好，如：周报先写风险，再写已完成，最后写下周计划">
+      <button id="btnSavePref" class="btn btn-primary">保存偏好</button>
+      <button id="btnRecall" class="btn">召回记忆</button>
+    </div>
+    <div class="evidence-toggle" id="evidenceToggle">▸ 核验证据（最近 PowerContext 操作记录）</div>
+    <div class="evidence-drawer" id="evidenceContent"></div>
+    
+    <!-- 诊断日志 -->
+    <div class="diagnostic-section" style="margin-top:16px;padding:12px;background:#f8f9fa;border-radius:8px;font-size:11px;max-height:200px;overflow-y:auto">
+      <div style="font-weight:600;margin-bottom:8px;color:#495057">诊断日志</div>
+      <div id="diagnosticLog" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- Disclaimer -->
+<div style="text-align:center;padding:16px;font-size:12px;color:var(--text-muted)">
+  FlowMemo 演示使用虚构数据，请勿上传真实机密信息。
+</div>
+
+<script src="js/app.js?v=20261103-6"></script>
+</body>
+</html>

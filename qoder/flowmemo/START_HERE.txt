@@ -1,0 +1,30 @@
+FlowMemo｜Qoder × PowerContext 大赛实施材料包
+==============================================
+
+注意：这是「需求规格 + 测试样例 + 验收脚本」材料包，尚不是已发布的网站。
+由于赛题规定主要代码必须由 Qoder 开发，真实开发和 Qoder Sites 发布应在 Qoder CN 完成。
+
+1. 将本 ZIP 放入 Codespaces 的 /workspaces/powercontext（不是 seekdb-core）。
+2. 在 Codespaces 终端执行：
+
+   cd /workspaces/powercontext
+   unzip -n flowmemo-qoder-competition-kit.zip -d .
+
+   赛题源码应位于原有 2026-competition-ecosystem 分支。
+
+3. 如果还没有 Qoder CN CLI，可用官方安装命令（Linux）：
+
+   curl -fsSL https://static.qoder.com.cn/qoder-cli-cn/install.sh | bash
+
+4. 在同一个仓库目录启动：
+
+   qodercn
+
+   首次使用按官方流程登录个人 Qoder CN 账号。把
+   qoder/flowmemo/ONE_MESSAGE_TO_QODER.txt 的全部文字复制给 Qoder。
+
+5. 在 Qoder 需要发布站点、开放公开访问、推送 Git 等敏感操作时确认授权。
+6. 只有当 Qoder 返回真实的公开站点 URL、完整 Commit SHA、PowerContext
+   记忆写入和召回测试结果时，才到比赛平台提交。
+
+不要使用之前的 seekdb-core 内核项目或 Bazel。不要发送密码、API Key、Token。

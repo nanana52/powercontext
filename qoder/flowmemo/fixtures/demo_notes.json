@@ -1,0 +1,27 @@
+{
+  "fixture": "fictional_work_demo",
+  "disclaimer": "所有名称、任务、日期均为虚构演示，不是实际公司资料或用户使用数据",
+  "project_id": "sample-workflow-2026",
+  "project_name": "样例：研究资料管理助手",
+  "notes": [
+    {
+      "id": "note-a",
+      "title": "例会记录 A",
+      "date": "2026-10-26",
+      "content": "项目：研究资料管理助手\n决定：MVP 先实现会议纪要到待办的转换，不做企业聊天集成。\n待办：小周在 2026-11-03 前完成示例数据整理，优先级高。\n待办：小林在 2026-11-05 前完成网站页面，优先级中。\n风险：公开演示必须使用虚构数据，不上传真实客户信息。"
+    },
+    {
+      "id": "note-b",
+      "title": "例会记录 B",
+      "date": "2026-10-30",
+      "content": "项目：研究资料管理助手\n决定：周报必须能标注来源记录，不允许编造完成项。\n待办：小周在 2026-11-04 前验证 PowerContext 记忆保存与召回，优先级高。\n待办：小林在 2026-11-06 前准备 Qoder Sites 公开发布截图，优先级高。\n风险：PowerContext 服务在公网站点上可能无法访问，需要服务器端诊断和部署说明。"
+    }
+  ],
+  "expected": {
+    "notes": 2,
+    "tasks": 4,
+    "decisions": 2,
+    "risks": 2,
+    "completed_at_initial_load": 0
+  }
+}

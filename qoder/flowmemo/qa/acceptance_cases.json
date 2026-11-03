@@ -1,0 +1,12 @@
+[
+  {"id":"FT01","case":"导入两份演示记录","expect":{"notes":2,"tasks":4,"decisions":2,"risks":2}},
+  {"id":"FT02","case":"任务标记完成后刷新","expect":"完成状态保留；统计卡片更新"},
+  {"id":"FT03","case":"任务来源可追溯","expect":"每条待办包含 note-a 或 note-b 的有效引用"},
+  {"id":"FT04","case":"生成首份周报","expect":"不出现虚构完成事项，包含风险和下周安排"},
+  {"id":"FT05","case":"PowerContext 保存偏好","expect":"实际 /v1/memory/remember HTTP 成功且返回记录"},
+  {"id":"FT06","case":"浏览器重开后召回","expect":"实际 /v1/context/prepare status=ready，返回保存的写作偏好"},
+  {"id":"FT07","case":"记忆改变周报","expect":"风险章节排在已完成前；展示来源偏好已召回"},
+  {"id":"FT08","case":"PowerContext 断线","expect":"红色连接失败提示，禁止假成功；基础页面仍能展示"},
+  {"id":"FT09","case":"公开发布验证","expect":"Qoder Sites 无痕访问公开 URL，功能可操作"},
+  {"id":"FT10","case":"安全与证据","expect":"客户端无 token；Qoder 开发和部署记录可核对"}
+]

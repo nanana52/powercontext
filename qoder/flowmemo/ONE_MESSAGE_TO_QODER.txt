@@ -1,0 +1,1 @@
+请从头到尾执行 qoder/flowmemo/AGENT_TASK.md 和 qoder/flowmemo/PROJECT_SPEC.md，使用此工作区的 2026-competition-ecosystem 分支，在 qoder/flowmemo 内由你（Qoder）完成主要代码开发、测试和 PowerContext 真实写入/召回接入，并使用 Qoder Sites 完成公开站点发布与参赛材料整理。先读取 fixtures、qa 和 docs 的要求，别只生成页面或计划；遇到错误自己调试，只有登录、授权、发布等必须由我确认的动作才停下来问我。任何未真实验证的结果都标未完成，不能用假数据伪装 PowerContext。

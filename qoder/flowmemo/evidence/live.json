@@ -1,0 +1,132 @@
+{
+  "checked_utc": "2026-11-03T07:02:15+00:00",
+  "powercontext_ready": true,
+  "cases": [
+    {
+      "case": "health_check_responds",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "configured": true,
+        "reachable": true,
+        "upstream_status": 200,
+        "upstream_content_type": "application/json",
+        "upstream_json": true,
+        "upstream_served_by": "tunnels-prod-rel-jpe1-v3-cluster",
+        "request_id": "693b4673b769a940"
+      }
+    },
+    {
+      "case": "powercontext_ready",
+      "verdict": "PASS",
+      "evidence": {
+        "health_status": "ready",
+        "upstream_status": 200,
+        "upstream_json": true,
+        "upstream_content_type": "application/json",
+        "error": null
+      }
+    },
+    {
+      "case": "forged_signature_rejected",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 401,
+        "error": "Invalid or expired session",
+        "preference_leaked": false
+      }
+    },
+    {
+      "case": "tampered_token_rejected_on_save",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 401,
+        "error": "Invalid or expired session"
+      }
+    },
+    {
+      "case": "renew_with_forged_token_rejected",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 401,
+        "error": "Invalid or expired session"
+      }
+    },
+    {
+      "case": "anonymous_debug_endpoint_removed",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 404,
+        "error": "not_found",
+        "note": "no route reads memory without a verified session token"
+      }
+    },
+    {
+      "case": "preference_saved_to_powercontext",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "scope_id": "scp_03…",
+        "request_id": "366e85157bed3dfd",
+        "error": null,
+        "upstream_status": null
+      }
+    },
+    {
+      "case": "scope_survives_refresh",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "verified": true,
+        "same_scope_id": true,
+        "scope_id": "scp_03…"
+      }
+    },
+    {
+      "case": "preference_recalled_from_powercontext",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "preference": "周报先写已完成事项，再写风险",
+        "count": 2,
+        "source": "entries",
+        "request_id": "eaaff7b700b3b30e"
+      }
+    },
+    {
+      "case": "latest_preference_wins",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "preference": "周报先写风险，再写已完成事项",
+        "request_id": "64f2441c9ecbf570"
+      }
+    },
+    {
+      "case": "visitor_isolation_scope_read",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "other_scope": "scp_7d…",
+        "scope_differs": true,
+        "preference_returned": null
+      }
+    },
+    {
+      "case": "foreign_session_token_rejected",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 401,
+        "error": "Invalid or expired session"
+      }
+    },
+    {
+      "case": "arbitrary_scope_id_ignored",
+      "verdict": "PASS",
+      "evidence": {
+        "http_status": 200,
+        "note": "scope comes only from the signed session token"
+      }
+    }
+  ]
+}

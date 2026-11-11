@@ -334,7 +334,7 @@ from powercontext.builtin.work import (
     project_work_continuity,
 )
 from powercontext.context import PowerContext
-from powercontext.errors import SourceConflictError
+from powercontext.errors import SourceConflictError, SourceNotFoundError
 from powercontext.sources import ConnectorBinding, SourceDefinitionManifest, SourceRef
 
 if TYPE_CHECKING:
@@ -560,6 +560,43 @@ class ScopedSourceApplication:
         if value.metadata.get("kind") == WORKING_NOTE_SOURCE_KIND:
             raise InvalidRuntimeRequestError("working-note-dedicated-api")
         return await self._capture(value)
+
+    async def capture_csv(
+        self, document_id: str, csv_text: str, primary_key_column: str, /
+    ) -> tuple[SourceReceipt, ...]:
+        """Capture CSV rows as distinct scoped Sources with exact raw evidence.
+
+        The input is fully parsed before writes. Each immutable row is idempotent
+        on replay; a changed row with the same document/key is a conflict.
+        """
+
+        from powercontext.builtin.sources.csv_rows import parse_csv_rows
+
+        captures = parse_csv_rows(document_id, csv_text, primary_key_column)
+        receipts: list[SourceReceipt] = []
+        async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                for capture in captures:
+                    source = await context.sources.resolve(capture)
+                    stored = await context.sources.add(source)
+                    receipts.append(SourceReceipt(
+                        source_ref=context.sources.catalog.as_ref(stored),
+                        sequence=await context.sources.journal.position(stored),
+                    ))
+        return tuple(receipts)
+
+    async def read_csv_row(self, document_id: str, primary_key: str, /):
+        """Read a CSV row, including raw physical text, after persistence/restart."""
+
+        from powercontext.builtin.sources.csv_rows import CsvRowSource, csv_row_source_id
+
+        ref = SourceRef(source_type="csv-row", source_id=csv_row_source_id(document_id, primary_key))
+        async with self._runtime._scope_operation(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                entry = await context.sources.journal.entry(ref)
+                if entry is None or not isinstance(entry.source, CsvRowSource):
+                    raise SourceNotFoundError(ref)
+                return await context.sources.read(entry.source)
 
     async def capture_many(self, values: Sequence[CaptureSource], /) -> tuple[SourceReceipt, ...]:
         """Capture one ordered integration batch with stable Source identities."""
@@ -1062,6 +1099,26 @@ class ScopedContextApplication:
                 return await self._prepare(request, scope)
             finally:
                 _PREPARE_ATOMIC_CONTEXT.reset(token)
+
+    async def prepare_packets(
+        self,
+        request: PrepareContextRequest,
+        /,
+        *,
+        previous_serialized: str | None = None,
+        max_payload_bytes: int = 2048,
+        authorize_scopes: Callable[[tuple[str, ...]], Awaitable[None]] | None = None,
+    ):
+        """Prepare and transport context as self-checking full or incremental packets."""
+
+        from powercontext.builtin.runtime.context_packets import pack_prepared_context
+
+        result = await self.prepare(request, authorize_scopes=authorize_scopes)
+        return pack_prepared_context(
+            result,
+            previous_serialized=previous_serialized,
+            max_payload_bytes=max_payload_bytes,
+        )
 
     async def _prepare(self, request: PrepareContextRequest, scope: ScopeDescriptor, /) -> PreparedContext:
         build, effort = await self._prepare_build(request, scope)

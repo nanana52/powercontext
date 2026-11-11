@@ -38,6 +38,11 @@ from powercontext.builtin.artifacts.memory.extraction import (
     MemoryExtractionIntent,
     MemoryExtractionOutput,
 )
+from powercontext.builtin.artifacts.memory.http_reranking import (
+    HTTP_SCORE_RERANK_POLICY,
+    HttpScoreMemoryReranker,
+    HttpScoreRerankConfig,
+)
 from powercontext.builtin.artifacts.memory.jev_reranking import (
     JEV_MEMORY_RERANK_POLICY,
     JevMemoryReranker,
@@ -99,6 +104,9 @@ __all__ = [
     "CONVERSATION_MEMORY_EXTRACTION_INSTRUCTIONS",
     "CONVERSATION_MEMORY_EXTRACTION_INSTRUCTIONS_VERSION",
     "JEV_MEMORY_RERANK_POLICY",
+    "HTTP_SCORE_RERANK_POLICY",
+    "HttpScoreMemoryReranker",
+    "HttpScoreRerankConfig",
     "MEMORY_EXTRACTION_INSTRUCTIONS",
     "MEMORY_EXTRACTION_INSTRUCTIONS_VERSION",
     "MEMORY_RERANK_INSTRUCTIONS",

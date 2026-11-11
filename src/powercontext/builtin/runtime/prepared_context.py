@@ -17,6 +17,9 @@
 from __future__ import annotations
 
 import json
+import math
+import re
+from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from itertools import chain
@@ -93,6 +96,16 @@ class PreparedContextOmissions:
 
 
 @dataclass(frozen=True)
+class PreparedContextFragment:
+    """One literal interval from one precisely cited Memory entry revision."""
+
+    address: MemoryEntryAddress
+    start: int
+    end: int
+    text: str
+
+
+@dataclass(frozen=True)
 class PreparedContextBuild:
     """Final public context and the exact origins selected to produce it.
 
@@ -106,6 +119,7 @@ class PreparedContextBuild:
     origins: tuple[PreparedContextOrigin, ...]
     omissions: PreparedContextOmissions = PreparedContextOmissions()
     code_origins: tuple[CodeEvidenceRef, ...] = ()
+    fragments: tuple[PreparedContextFragment, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -235,6 +249,9 @@ class PreparedContextBuilder:
         if sum(len(candidates.hits) for candidates in experience_candidates) > self.experience_candidate_limit:
             raise PreparedContextInvariantError("experience-candidate-limit")
 
+        if request.evidence_selection:
+            return self._build_literal_evidence(request, current_scope_id, memory_candidates)
+
         content, origins, omissions = self._select_entries(
             request=request,
             current_scope_id=current_scope_id,
@@ -254,6 +271,109 @@ class PreparedContextBuilder:
             context=PreparedContext(status="ready", content=content, content_bytes=content_bytes),
             origins=origins,
             omissions=omissions,
+        )
+
+    def _build_literal_evidence(
+        self, request: PrepareContextRequest, current_scope_id: str | None,
+        groups: Sequence[PreparedMemoryCandidates],
+    ) -> PreparedContextBuild:
+        """Retrieve query-relevant unmodified sentence intervals under total wire budget."""
+        query = _evidence_terms(request.query)
+        if not query:
+            return PreparedContextBuild(context=self.empty(), origins=())
+        records: list[tuple[MemoryEntryAddress, str, int, int, int, int]] = []
+        sentence_token_counts = Counter()
+        for group in groups:
+            sid = group.scope_id or current_scope_id
+            if not sid:
+                continue
+            for hindex, hit in enumerate(group.hits):
+                address = MemoryEntryAddress(
+                    memory=ArtifactAddress(scope_id=sid, artifact=hit.memory_ref),
+                    entry_id=hit.entry_id, entry_version_id=hit.entry_version_id,
+                )
+                # Never normalize or paraphrase the stored text; retain exact offsets.
+                for start, end in _evidence_sentences(hit.text):
+                    terms = set(_evidence_terms(hit.text[start:end]))
+                    sentence_token_counts.update(terms)
+                    records.append((address, hit.text, start, end, hindex, len(terms)))
+        if not records:
+            return PreparedContextBuild(context=self.empty(), origins=())
+
+        def relevance(row):
+            address, source, start, end, hindex, size = row
+            words = _evidence_terms(source[start:end])
+            set_words = set(words)
+            overlap = set(query) & set_words
+            if not overlap:
+                return -1.0
+            total = len(records)
+            idf = sum(math.log1p((total + 1) / (sentence_token_counts[w] + 1)) for w in overlap)
+            phrase = sum(0.9 for a, b in zip(query, query[1:]) if a + ' ' + b in ' '.join(words))
+            return (idf + phrase) * (0.6 + 0.4 * len(overlap) / max(1, len(set(query)))) / (1.0 + 0.0025 * max(0, end - start - 180))
+
+        ranked = sorted(records, key=lambda r: (-relevance(r), r[4], r[2]))
+        fragments: list[PreparedContextFragment] = []
+        entries: list[dict] = []
+        origins: list[MemoryEntryAddress] = []
+        occupied: dict[tuple[str, str, str], list[tuple[int, int]]] = {}
+
+        def render(items: list[dict]) -> str:
+            return '\n\n'.join((TRUST_POLICY, _BEGIN_MARKER+'\n'+json.dumps(
+                {'trust': 'untrusted_history', 'items': items}, ensure_ascii=False,
+                separators=(',', ':'))+'\n'+_END_MARKER))
+
+        for row in ranked:
+            addr, text, start, end, _hindex, _count = row
+            if len(entries) >= 8:
+                break
+            if relevance(row) < 0 and entries:
+                break
+            key = (addr.memory.scope_id, addr.memory.artifact.artifact_id, addr.entry_id)
+            if any(not (end <= left or start >= right) for left, right in occupied.get(key, ())):
+                continue
+            citation = {'scope_id': addr.memory.scope_id,
+                        'memory_ref': addr.memory.artifact.model_dump(mode='json'),
+                        'entry_id': addr.entry_id, 'entry_version_id': addr.entry_version_id}
+            # Sentence span is preferred; if too large, retain a literal query-near window.
+            variants = [(start, end)]
+            if end-start > 350:
+                matches = [(text[start:end].lower().find(token), token) for token in query if text[start:end].lower().find(token) >= 0]
+                anchor = start + min((p for p, _ in matches), default=(end-start)//2)
+                for width in (360, 260, 160, 100):
+                    a = max(start, min(anchor-width//3, end-width))
+                    variants.append((a, min(end, a+width)))
+            chosen = None
+            for a,b in variants:
+                entry = {'citation': citation, 'content': text[a:b], 'start': a, 'end': b}
+                if len(render([*entries, entry]).encode('utf-8')) <= request.max_bytes:
+                    chosen = (a,b,entry)
+                    break
+            if chosen is None:
+                # Binary search the largest non-empty literal interval that fits.
+                low, high = 1, min(end-start, 400)
+                while low <= high:
+                    width=(low+high)//2
+                    candidate = {'citation': citation, 'content':text[start:start+width], 'start':start,'end':start+width}
+                    if len(render([*entries,candidate]).encode('utf-8')) <= request.max_bytes:
+                        chosen=(start,start+width,candidate)
+                        low=width+1
+                    else:
+                        high=width-1
+            if chosen is None or chosen[1] <= chosen[0]:
+                continue
+            a,b,entry=chosen
+            fragments.append(PreparedContextFragment(address=addr, start=a, end=b, text=text[a:b]))
+            entries.append(entry)
+            origins.append(addr)
+            occupied.setdefault(key, []).append((a,b))
+        if not entries:
+            return PreparedContextBuild(context=self.empty(), origins=())
+        content = render(entries)
+        return PreparedContextBuild(
+            context=PreparedContext(status='ready', content=content,
+                                    content_bytes=len(content.encode('utf-8'))),
+            origins=tuple(origins), fragments=tuple(fragments),
         )
 
     def probe_budget(
@@ -728,3 +848,25 @@ def _truncate_utf8(text: str, byte_budget: int) -> str:
     prefix_budget = byte_budget - len(_ELLIPSIS.encode("utf-8"))
     encoded_prefix = text.encode("utf-8")[:prefix_budget]
     return f"{encoded_prefix.decode('utf-8', errors='ignore')}{_ELLIPSIS}"
+
+
+_EVIDENCE_STOP = frozenset("the a an and or of in on to for by with as at is are was were be been that this these those from than into via how does do did which what can had have has will should would could their its our it we they them not".split())
+
+
+def _evidence_terms(text: str) -> tuple[str, ...]:
+    return tuple(token for token in re.findall(r"[a-z]+|\d+", text.lower()) if token not in _EVIDENCE_STOP)
+
+
+def _evidence_sentences(text: str) -> tuple[tuple[int, int], ...]:
+    spans = []
+    for match in re.finditer(r"[^.!?\n]+(?:[.!?]+|$)", text):
+        start,end=match.span()
+        while start<end and text[start].isspace():
+            start+=1
+        while end>start and text[end-1].isspace():
+            end-=1
+        if end>start:
+            spans.append((start,end))
+    if not spans and text.strip():
+        spans.append((0,len(text)))
+    return tuple(spans)

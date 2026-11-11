@@ -189,8 +189,9 @@ class NoMemoryIndex:
 class CompositeMemoryIndex:
     """Combine independent search indexes without leaking them into repositories."""
 
-    def __init__(self, *indexes: MemoryIndex) -> None:
+    def __init__(self, *indexes: MemoryIndex, seekdb_hybrid: bool = False) -> None:
         self.indexes = indexes
+        self.seekdb_hybrid = seekdb_hybrid
         fts = any(index.capabilities.fts for index in indexes)
         vector_indexes = tuple(index for index in indexes if index.capabilities.vector)
         profile = vector_indexes[0].capabilities.embedding_profile if vector_indexes else None
@@ -247,6 +248,12 @@ class CompositeMemoryIndex:
         request: MemorySearchRequest,
         /,
     ) -> MemorySearchChannels:
+        if self.seekdb_hybrid and request.mode == "hybrid":
+            from powercontext.builtin.persistence.seekdb.native_hybrid import seekdb_hybrid_channels
+            vector = next((index for index in self.indexes if index.capabilities.vector), None)
+            if vector is None:
+                raise CapabilityNotSupportedError("vector")
+            return await seekdb_hybrid_channels(connection, scope_id, request, vector)
         fts: tuple[MemoryChannelHit, ...] = ()
         vector: tuple[MemoryChannelHit, ...] = ()
         for index in self.indexes:

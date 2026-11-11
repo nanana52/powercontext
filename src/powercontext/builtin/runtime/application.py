@@ -847,6 +847,17 @@ class ScopedContextApplication:
                 await authorize_scopes((self.scope_id, *scope.context_references))
             return await self._prepare(request, scope)
 
+    async def prepare_incremental(self, request: PrepareContextRequest, base_pack=None):
+        """Prepare a full pack, or a serializable delta against an existing full pack."""
+        from powercontext.builtin.runtime.context_pack import ContextPack, ContextPackDelta
+        result = await self.prepare(request)
+        target = ContextPack.from_content(result.content or "")
+        if base_pack is None:
+            return target
+        if not isinstance(base_pack, ContextPack):
+            raise TypeError("base_pack must be a ContextPack")
+        return ContextPackDelta.between(base_pack, target)
+
     async def _prepare(self, request: PrepareContextRequest, scope: ScopeDescriptor, /) -> PreparedContext:
         build, effort = await self._prepare_build(request, scope)
         if effort is not None and self._runtime._recall_effort_sink is not None:
@@ -3110,6 +3121,8 @@ class BuiltinRuntime:
         self.work = WorkApplication(self)
         self.memory = MemoryApplication(self)
         self.topic_memory = TopicMemoryApplication(self)
+        from powercontext.builtin.runtime.source_lifecycle import SourceLifecycleApplication
+        self.lifecycle = SourceLifecycleApplication(self)
         self.records = RecordApplication(self)
         self.prompts = PromptApplication(self)
         self.review = ReviewApplication(self)

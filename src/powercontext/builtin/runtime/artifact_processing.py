@@ -50,6 +50,8 @@ from powercontext._logging import log_safely
 from powercontext.builtin.persistence.database import AsyncDatabase
 from powercontext.builtin.persistence.errors import ArtifactProcessingLeadershipLostError
 from powercontext.builtin.persistence.processing_intents import ArtifactProcessingIntentRepository
+from powercontext.builtin.persistence.cursors import SourceCursorRepository
+from powercontext.builtin.persistence.tables import SOURCE_JOURNAL_HEADS_TABLE
 from powercontext.builtin.persistence.supervision import (
     ArtifactProcessingBindingStateRepository,
     ArtifactProcessingFence,
@@ -110,6 +112,7 @@ class ArtifactProcessingBinding:
     max_workers: int = 1
     worker_timeout_seconds: float = 600.0
     automatic_processing_interval: timedelta | None = None
+    source_count_threshold: int | None = None
     cron: str | None = None
     timezone: str = "Asia/Shanghai"
     config_prefix: str | None = None
@@ -131,6 +134,8 @@ class ArtifactProcessingBinding:
             raise ValueError("max_workers must be a positive integer")  # noqa: TRY003
         if self.worker_timeout_seconds <= 0:
             raise ValueError("worker_timeout_seconds must be positive")  # noqa: TRY003
+        if self.source_count_threshold is not None and (type(self.source_count_threshold) is not int or self.source_count_threshold < 1):
+            raise ValueError("source_count_threshold must be a positive integer")
         if self.automatic_processing_interval is not None:
             if self.automatic_processing_interval.total_seconds() <= 0:
                 raise ValueError("automatic interval must be positive")  # noqa: TRY003
@@ -648,6 +653,11 @@ class ArtifactProcessingSupervisor:
                 state.next_discovery_at = loop.time() + _DISCOVERY_PAGE_DELAY_SECONDS
         else:
             state.reconcile_complete = True
+        # Count admission is durable (requested_generation), and independent of
+        # periodic schedule checkpoints. The current Source cursor is rechecked
+        # after each successfully processed window, so a small remainder waits.
+        if binding.source_count_threshold is not None:
+            await self._discover_count(state)
         # Alternate discovery channels so explicit traffic cannot monopolize admission.
         state.automatic_next = not state.automatic_next
         if state.automatic_next:
@@ -656,6 +666,33 @@ class ArtifactProcessingSupervisor:
         else:
             await self._discover_requested(state)
             await self._discover_automatic(state)
+
+    async def _discover_count(self, state: _FamilyState) -> None:
+        """Accept count-qualified journal work through the native durable intent lane."""
+        threshold = state.binding.source_count_threshold
+        if threshold is None:
+            return
+        binding_name = state.binding.binding_name
+        cursor_repo = SourceCursorRepository()
+        async with self._database.transaction() as connection:
+            await self._leases.require_fence(connection, self._require_current_fence())
+            # A bounded keyset over dirty intents avoids reading Source bodies or
+            # constructing models on the Supervisor thread.
+            rows = await self._intents.scan(connection, binding_name, limit=_DISCOVERY_PAGE_SIZE,
+                                            dirty_only=True)
+            head = SOURCE_JOURNAL_HEADS_TABLE
+            for row in rows:
+                if row.requested_generation > row.handled_generation:
+                    continue  # already accepted, including worker failures
+                high = await connection.scalar(select(head.c.position).where(head.c.scope_id == row.scope_id))
+                if high is None:
+                    continue
+                cursor = await cursor_repo.load(connection, row.scope_id, binding_name)
+                consumed = 0 if cursor is None else cursor.cursor.sequence
+                if int(high) - consumed < threshold:
+                    continue
+                await self._intents.request(connection, row.scope_id, binding_name)
+                state.discovery_pending = True
 
     async def _discover_requested(self, state: _FamilyState) -> None:
         capacity = self._fresh_capacity(state)
@@ -1093,6 +1130,10 @@ class ArtifactProcessingSupervisor:
                 continue
             if state.next_schedule_at is not None:
                 deadlines.append(state.next_schedule_at)
+            if state.binding.source_count_threshold is not None:
+                # Lightweight periodic metadata polling also handles captures
+                # performed by other interfaces and restarted supervisor terms.
+                deadlines.append(now + 0.25)
             if state.discovery_pending or state.scan_in_progress or not state.reconcile_complete or state.degraded:
                 deadlines.append(max(now, state.next_discovery_at))
         return None if not deadlines else max(0.001, min(deadlines) - now)

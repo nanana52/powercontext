@@ -24,6 +24,7 @@ import { recallBeforeAgentStart, type PluginRuntime } from '../src/recall.ts'
 import { resolveScopeId } from '../src/scope.ts'
 import { registerTools } from '../src/tools.ts'
 import { GUIDANCE } from '../src/guidance.ts'
+import { captureSelectedPiBranch } from '../src/session-branch.ts'
 
 function createRuntime(): PluginRuntime {
   const config = resolveConfig()
@@ -87,8 +88,17 @@ export default function powercontextPi(pi: ExtensionAPI): void {
     return recalled ?? { systemPrompt }
   })
 
-  pi.on('agent_end', (_event, ctx) => {
-    void runtime?.flushPending?.('agent_end', ctx.signal)
+  pi.on('agent_end', async (_event, ctx) => {
+    if (runtime?.config.captureSessionBranch) {
+      try {
+        await captureSelectedPiBranch({
+          runtime, session: ctx.sessionManager, cwd: ctx.cwd, signal: ctx.signal,
+        })
+      } catch (error) {
+        runtime.diagnostic?.('pi_session_branch', error)
+      }
+    }
+    await runtime?.flushPending?.('agent_end', ctx.signal)
   })
 
   pi.on('session_before_compact', async (event, _ctx) => {

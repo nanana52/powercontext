@@ -26,6 +26,11 @@ from powercontext.builtin.sources.content import (
     ContentSourceTarget,
     ContentTextEvidenceProjection,
 )
+from powercontext.builtin.sources.availability import (
+    SOURCE_AVAILABILITY_ADAPTER, SOURCE_AVAILABILITY_DEFINITION,
+    SOURCE_AVAILABILITY_EVENT_NAME, SourceAvailabilityChange, SourceAvailabilityEvent,
+    availability_from_entries, lineage_has_available_source,
+)
 from powercontext.builtin.sources.csv_rows import (
     CSV_ROW_SOURCE_ADAPTER,
     CSV_ROW_SOURCE_DEFINITION,
@@ -34,6 +39,10 @@ from powercontext.builtin.sources.csv_rows import (
     CsvRowSource,
     parse_csv_rows,
     csv_row_source_id,
+)
+from powercontext.builtin.sources.pdf_pages import (
+    PDF_PAGE_SOURCE_ADAPTER, PDF_PAGE_SOURCE_DEFINITION, PDF_PAGE_SOURCE_NAME,
+    PdfPageCapture, PdfPageSource, parse_pdf_pages, pdf_page_source_id, rank_pdf_pages,
 )
 from powercontext.builtin.sources.external_skill import (
     EXTERNAL_SKILL_SNAPSHOT_SOURCE_ADAPTER,
@@ -74,6 +83,8 @@ from powercontext.sources import TEXT_EVIDENCE_PROJECTION_KEY, SourceDefinitionR
 BUILTIN_SOURCE_REGISTRY = SourceDefinitionRegistry((
     CONTENT_SOURCE_DEFINITION,
     CSV_ROW_SOURCE_DEFINITION,
+    SOURCE_AVAILABILITY_DEFINITION,
+    PDF_PAGE_SOURCE_DEFINITION,
     EXTERNAL_SKILL_SNAPSHOT_SOURCE_DEFINITION,
     SKILL_PACKAGE_UPLOAD_SOURCE_DEFINITION,
     SKILL_USAGE_SOURCE_DEFINITION,
@@ -84,6 +95,10 @@ __all__ = [
     "CSV_ROW_SOURCE_ADAPTER",
     "CSV_ROW_SOURCE_DEFINITION",
     "CSV_ROW_SOURCE_NAME",
+    "PDF_PAGE_SOURCE_NAME",
+    "PDF_PAGE_SOURCE_ADAPTER",
+    "PDF_PAGE_SOURCE_DEFINITION",
+    "PdfPageCapture", "PdfPageSource", "parse_pdf_pages", "pdf_page_source_id", "rank_pdf_pages",
     "CsvRowCapture",
     "CsvRowSource",
     "parse_csv_rows",

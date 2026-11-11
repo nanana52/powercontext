@@ -242,6 +242,11 @@ class RuntimeConfig(BaseModel):
 
     schedule_seconds: float | None = Field(default=None, gt=0)
     memory_schedule_seconds: float | None = Field(default=None, gt=0)
+    memory_source_count_threshold: int | None = Field(default=None, ge=1)
+    topic_memory_source_count_threshold: int | None = Field(default=None, ge=1)
+    embedding_cache_max_entries: int = Field(default=0, ge=0, le=65536)
+    embedding_cache_ttl_seconds: float = Field(default=300, gt=0)
+    embedding_cache_batch_size: int = Field(default=64, ge=1, le=512)
     experience_schedule_seconds: float | None = Field(default=None, gt=0)
     dream_enabled: bool = True
     dream_max_pending_per_scope: int = Field(default=32, ge=1, le=1000)

@@ -289,35 +289,39 @@ class OceanBaseAtomicMemoryIndex(RelationalAtomicMemoryIndex):
         *,
         limit: int,
     ) -> AtomicMemorySearchChannels:
+        """Retrieve both native index candidate streams with one SQL execution.
+
+        The SQL contains independent, bounded native FULLTEXT and ANN CTEs.
+        Eligibility is inside *each* candidate scan, before either LIMIT.
+        The tagged result still feeds the existing fusion and reference path.
+        """
         if connection.dialect.name != "mysql":
             raise AtomicMemoryIndexError("oceanbase", "OceanBase Atomic Memory requires an OceanBase tenant")
         eligibility, parameters = atomic_memory_filter_sql(request.filters, "mysql")
-        parameters["scope_id"] = scope_id
-        limit_sql = " LIMIT :result_limit"
-        parameters["result_limit"] = limit
-        fts: tuple[AtomicMemoryIndexHit, ...] = ()
-        vector: tuple[AtomicMemoryIndexHit, ...] = ()
-        if request.mode in {"fts", "hybrid"}:
+        parameters.update(scope_id=scope_id, result_limit=limit)
+        candidates: list[str] = []
+        streams: list[str] = []
+        need_fts = request.mode in {"fts", "hybrid"}
+        need_vector = request.mode in {"vector", "hybrid"}
+        if need_fts:
             terms, required = fts_query_requirements(request.query, floor=request.admission)
             if terms:
                 coverage, coverage_parameters = oceanbase_fts_coverage_sql(terms)
                 parameters.update(coverage_parameters)
                 parameters.update(fts_query=" ".join(terms), fts_required=required)
-                rows = (
-                    await connection.execute(
-                        text(
-                            f"SELECT {_HIT_COLUMNS}, MATCH(searchable_text) AGAINST (:fts_query) AS score, "  # noqa: S608
-                            "MATCH(searchable_text) AGAINST (:fts_query) AS raw_score, 'oceanbase_match' AS score_metric "
-                            "FROM pc_atomic_memory_current WHERE scope_id = :scope_id "
-                            f"AND ({eligibility}) AND MATCH(searchable_text) AGAINST (:fts_query) > 0 "
-                            f"AND ({coverage}) >= :fts_required "
-                            f"ORDER BY score DESC, artifact_id{limit_sql}"
-                        ),
-                        parameters,
-                    )
-                ).mappings()
-                fts = atomic_memory_channel_hits(rows)
-        if request.mode in {"vector", "hybrid"}:
+                score = "MATCH(searchable_text) AGAINST (:fts_query)"
+                candidates.append(
+                    f"fts_candidates AS (SELECT {_HIT_COLUMNS}, {score} AS score, "  # noqa: S608
+                    f"{score} AS raw_score, 'oceanbase_match' AS score_metric "
+                    "FROM pc_atomic_memory_current WHERE scope_id = :scope_id "
+                    f"AND ({eligibility}) AND {score} > 0 AND ({coverage}) >= :fts_required "
+                    "ORDER BY score DESC, artifact_id LIMIT :result_limit)"
+                )
+                streams.append(
+                    "SELECT 'fts' AS channel, artifact_id, revision, state_version, kind, text, "
+                    "score, raw_score, score_metric, NULL AS distance FROM fts_candidates"
+                )
+        if need_vector:
             query_vector = self._require_vectors(request)
             profile = self.profile
             if profile is None:
@@ -327,19 +331,39 @@ class OceanBaseAtomicMemoryIndex(RelationalAtomicMemoryIndex):
                 profile=atomic_memory_profile_fingerprint(profile),
                 projection_format=ATOMIC_MEMORY_PROJECTION_FORMAT,
                 ef_search=self._ef_search,
-                max_distance=None,
                 min_semantic_similarity=(
                     DEFAULT_ADMISSION_FLOOR if request.admission is None else request.admission
                 ).min_semantic_similarity,
             )
-            statement = text(
-                oceanbase_atomic_memory_vector_sql(eligibility)
-                if limit <= 16384
-                else atomic_memory_vector_sql(eligibility, "mysql", bounded=True, threshold=False)
-            ).bindparams(bindparam("query_vector", type_=VECTOR(profile.dimension)))
-            rows = (await connection.execute(statement, parameters)).mappings()
-            vector = atomic_memory_channel_hits(rows, vector=True)
-        return AtomicMemorySearchChannels(fts=fts, vector=vector)
+            candidates.append(
+                f"vector_candidates AS (SELECT {_HIT_COLUMNS}, "  # noqa: S608
+                "l2_distance(embedding, :query_vector) AS distance "
+                "FROM pc_atomic_memory_current WHERE scope_id = :scope_id "
+                f"AND ({eligibility}) AND embedding IS NOT NULL "
+                "AND embedding_input_hash IS NOT NULL AND profile_fingerprint = :profile "
+                "AND projection_format = :projection_format "
+                "ORDER BY l2_distance(embedding, :query_vector) APPROXIMATE "
+                "LIMIT :result_limit PARAMETERS(ef_search=:ef_search))"
+            )
+            streams.append(
+                "SELECT 'vector' AS channel, artifact_id, revision, state_version, kind, text, "
+                "NULL AS score, NULL AS raw_score, NULL AS score_metric, distance "
+                "FROM vector_candidates WHERE "
+                "greatest(-1.0, least(1.0, 1.0 - distance * distance / 2.0)) >= :min_semantic_similarity"
+            )
+        if not streams:
+            return AtomicMemorySearchChannels()
+        sql = "WITH " + ", ".join(candidates) + " " + " UNION ALL ".join(streams)
+        statement = text(sql)
+        if need_vector and self.profile is not None:
+            statement = statement.bindparams(bindparam("query_vector", type_=VECTOR(self.profile.dimension)))
+        result_rows = tuple((await connection.execute(statement, parameters)).mappings())
+        fts_rows = (row for row in result_rows if row["channel"] == "fts")
+        vector_rows = (row for row in result_rows if row["channel"] == "vector")
+        return AtomicMemorySearchChannels(
+            fts=atomic_memory_channel_hits(fts_rows),
+            vector=atomic_memory_channel_hits(vector_rows, vector=True),
+        )
 
 
 __all__ = ["OceanBaseAtomicMemoryIndex"]

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from powercontext.builtin.sources import ContentSource
+from powercontext.builtin.sources import ContentSource, SourceAvailabilityEvent
 from powercontext.sources import Source, SourceRef
 
 
@@ -47,6 +47,10 @@ class WorkingNoteUnavailableError(SourceNotEligibleError):
 def is_generation_eligible(source: Source, /) -> bool:
     """Return whether a hydrated Source may enter a model or Candidate."""
 
+    if isinstance(source, SourceAvailabilityEvent):
+        return False
+    if isinstance(source, SourceAvailabilityEvent):
+        raise SourceNotEligibleError(source_ref)
     if not isinstance(source, ContentSource):
         return True
     if source.internal is not None:

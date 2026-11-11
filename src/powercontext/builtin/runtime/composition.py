@@ -650,6 +650,15 @@ async def open_builtin_runtime(
                 else embedding_model
             )
         configured_embedding = _usage_reporting_embedding_model(configured_embedding_source)
+        if configured_embedding is not None and config.runtime.embedding_cache_max_entries:
+            from powercontext.builtin.inference.singleflight_cache import SingleFlightEmbeddingModel
+
+            configured_embedding = SingleFlightEmbeddingModel(
+                configured_embedding,
+                max_entries=config.runtime.embedding_cache_max_entries,
+                ttl_seconds=config.runtime.embedding_cache_ttl_seconds,
+                batch_size=config.runtime.embedding_cache_batch_size,
+            )
         configured_external_skills = (
             _external_skill_provider(config.external_skills)
             if external_skill_provider is None
@@ -800,6 +809,8 @@ async def open_builtin_runtime(
                     prompts=dict(contexts.prompt_registry.capabilities),
                 ),
                 source_window_limit=config.runtime.source_window_limit,
+                memory_source_count_threshold=config.runtime.memory_source_count_threshold,
+                topic_memory_source_count_threshold=config.runtime.topic_memory_source_count_threshold,
                 extraction_diagnostics=ExtractionDiagnostics(
                     pipeline_configured=(
                         contexts.memory_extraction
@@ -908,6 +919,7 @@ async def open_builtin_runtime(
         if config.runtime.memory_rerank_enabled and configured_reranker is None:
             raise BuiltinConfigurationError("memory-reranker")
         _require_decision_backend(config.runtime, configured_decision)
+        await runtime.resume_source_count_triggers()
         yield runtime
 
 

@@ -25,6 +25,7 @@ export interface ResolvedConfig {
   scopeId: string | undefined
   authorization: string | undefined
   capturePrompts: boolean
+  captureSessionBranch: boolean
   requestTimeoutMs: number
   generationTimeoutMs?: number
   httpBudgetMs: number
@@ -41,6 +42,7 @@ const DEFAULTS: ResolvedConfig = {
   scopeId: undefined,
   authorization: undefined,
   capturePrompts: true,
+  captureSessionBranch: false,
   requestTimeoutMs: 3000,
   generationTimeoutMs: 30_000,
   httpBudgetMs: 6000,
@@ -110,6 +112,7 @@ export function resolveConfig(env: NodeJS.ProcessEnv = process.env): ResolvedCon
     scopeId: envString(env, 'POWERCONTEXT_PI_SCOPE_ID'),
     authorization: envString(env, 'POWERCONTEXT_PI_AUTHORIZATION'),
     capturePrompts: envBoolean(env, 'POWERCONTEXT_PI_CAPTURE_PROMPTS') ?? DEFAULTS.capturePrompts,
+    captureSessionBranch: envBoolean(env, 'POWERCONTEXT_PI_CAPTURE_SESSION_BRANCH') ?? DEFAULTS.captureSessionBranch,
     requestTimeoutMs,
     generationTimeoutMs,
     httpBudgetMs,

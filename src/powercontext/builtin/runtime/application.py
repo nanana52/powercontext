@@ -583,7 +583,128 @@ class ScopedSourceApplication:
                         source_ref=context.sources.catalog.as_ref(stored),
                         sequence=await context.sources.journal.position(stored),
                     ))
+        if receipts:
+            self._runtime.notify_source_captured(self.scope_id)
         return tuple(receipts)
+
+    async def prepare_original_evidence(
+        self, query: str, source_refs: Sequence[SourceRef], /, *, max_bytes: int = 8000, limit: int = 8
+    ):
+        """Choose exact, scope-authorized original Source spans under a byte budget."""
+        from powercontext.builtin.runtime.source_evidence import OriginalSourceCandidate, select_original_evidence
+
+        if len(source_refs) > 64:
+            raise InvalidRuntimeRequestError("original-evidence-candidate-limit")
+        candidates = []
+        async with self._runtime._scope_operation(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                for ref in source_refs:
+                    entry = await context.sources.journal.entry(ref)
+                    if entry is None:
+                        raise SourceNotFoundError(ref)
+                    source = entry.source
+                    text = getattr(source, "content", None)
+                    if text is None:
+                        text = getattr(source, "text", None)
+                    if text is None:
+                        text = getattr(source, "raw_record", None)
+                    if isinstance(text, str):
+                        candidates.append(OriginalSourceCandidate(ref=ref, text=text))
+        return select_original_evidence(
+            query, candidates, scope_id=self.scope_id, max_bytes=max_bytes, limit=limit
+        )
+
+    async def set_source_available(self, ref: SourceRef, available: bool, /) -> SourceReceipt:
+        """Append an auditable, scope-local withdrawal/restoration event.
+
+        The original Source stays in the catalog, preserving exact historical
+        references. The new event survives process restart and cannot be
+        consumed by Memory generation as ordinary evidence.
+        """
+        from powercontext.builtin.sources.availability import SourceAvailabilityChange
+
+        if ref.source_type == "source-availability-event":
+            raise InvalidRuntimeRequestError("availability-event-recursion")
+        change = SourceAvailabilityChange(
+            change_id=uuid4().hex, source_type=ref.source_type,
+            source_id=ref.source_id, available=available,
+        )
+        async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                existing = await context.sources.journal.entry(ref)
+                if existing is None:
+                    raise SourceNotFoundError(ref)
+                event = await context.sources.resolve(change)
+                recorded = await context.sources.add(event)
+                receipt = SourceReceipt(
+                    source_ref=context.sources.catalog.as_ref(recorded),
+                    sequence=await context.sources.journal.position(recorded),
+                )
+        return receipt
+
+    async def withdraw_source(self, ref: SourceRef, /) -> SourceReceipt:
+        return await self.set_source_available(ref, False)
+
+    async def restore_source(self, ref: SourceRef, /) -> SourceReceipt:
+        return await self.set_source_available(ref, True)
+
+    async def source_availability(self, ref: SourceRef, /) -> bool:
+        from powercontext.builtin.sources.availability import availability_from_entries
+
+        async with self._runtime._scope_operation(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                existing = await context.sources.journal.entry(ref)
+                if existing is None:
+                    raise SourceNotFoundError(ref)
+                entries = await context.sources.journal.entries()
+        return availability_from_entries(entries).get((ref.source_type, ref.source_id), True)
+
+    async def capture_pdf(self, document_id: str, pdf_data: bytes, /) -> tuple[SourceReceipt, ...]:
+        """Persist all physical PDF pages with exact Source references."""
+        from powercontext.builtin.sources.pdf_pages import parse_pdf_pages
+
+        pages = parse_pdf_pages(document_id, pdf_data)
+        receipts = []
+        async with self._runtime._scope_operation(self.scope_id), self._runtime._locked(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                for capture in pages:
+                    source = await context.sources.resolve(capture)
+                    stored = await context.sources.add(source)
+                    receipts.append(SourceReceipt(
+                        source_ref=context.sources.catalog.as_ref(stored),
+                        sequence=await context.sources.journal.position(stored),
+                    ))
+        if receipts:
+            self._runtime.notify_source_captured(self.scope_id)
+        return tuple(receipts)
+
+    async def get_pdf_page(self, document_id: str, page_number: int, /):
+        """Return one precise page including extraction status after restart."""
+        from powercontext.builtin.sources.pdf_pages import PdfPageSource, pdf_page_source_id
+
+        ref = SourceRef(source_type="pdf-page", source_id=pdf_page_source_id(document_id, page_number))
+        async with self._runtime._scope_operation(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                entry = await context.sources.journal.entry(ref)
+                if entry is None or not isinstance(entry.source, PdfPageSource):
+                    raise SourceNotFoundError(ref)
+                return await context.sources.read(entry.source)
+
+    async def search_pdf_pages(self, document_id: str, query: str, /, *, limit: int = 5):
+        """Rank real PDF page evidence in the current authorized Scope."""
+        from powercontext.builtin.sources.pdf_pages import PdfPageSource, rank_pdf_pages
+
+        async with self._runtime._scope_operation(self.scope_id):
+            async with self._runtime._context(self.scope_id) as context:
+                entries = await context.sources.journal.entries()
+        pages = tuple(
+            entry.source for entry in entries
+            if isinstance(entry.source, PdfPageSource) and entry.source.document_id == document_id
+        )
+        return tuple(
+            (SourceRef(source_type="pdf-page", source_id=page.name), page.page_number, page.text)
+            for page in rank_pdf_pages(query, pages, limit=limit)
+        )
 
     async def read_csv_row(self, document_id: str, primary_key: str, /):
         """Read a CSV row, including raw physical text, after persistence/restart."""
@@ -623,6 +744,7 @@ class ScopedSourceApplication:
                         span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: len(records)})
         except BaseValueConflictError as error:
             raise SourceConflictError("identity", error.identity) from None
+        self._runtime.notify_source_captured(self.scope_id)
         return tuple(
             SourceReceipt(
                 source_ref=SourceRef(source_type=record.source_type, source_id=record.source_id),
@@ -699,6 +821,7 @@ class ScopedSourceApplication:
                             span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
             except BaseValueConflictError as error:
                 raise SourceConflictError("identity", error.identity) from None
+            self._runtime.notify_source_captured(self.scope_id)
             return SourceReceipt(
                 source_ref=SourceRef(source_type=record.source_type, source_id=record.source_id),
                 sequence=record.position,
@@ -716,7 +839,9 @@ class ScopedSourceApplication:
                 )
                 if span is not None:
                     span.set_attributes({_MEMORY_CAPTURE_SOURCE_COUNT: 1})
-            return SourceReceipt(source_ref=context.sources.catalog.as_ref(source), sequence=sequence)
+            receipt = SourceReceipt(source_ref=context.sources.catalog.as_ref(source), sequence=sequence)
+        self._runtime.notify_source_captured(self.scope_id)
+        return receipt
 
 
 class SourceApplication:
@@ -3467,6 +3592,21 @@ class ScopedAtomicMemoryApplication:
             )
             with stage as span:
                 result = await self._scoped.search(query, **kwargs)
+                from powercontext.builtin.sources.availability import (
+                    availability_from_entries, lineage_has_available_source,
+                )
+
+                async with self._runtime._context(self.scope_id) as context:
+                    states = availability_from_entries(await context.sources.journal.entries())
+                if states:
+                    hits = tuple(h for h in result.hits if lineage_has_available_source(h.lineage, states))
+                    allowed = {(h.hit.artifact_ref.family, h.hit.artifact_ref.artifact_id,
+                                h.hit.artifact_ref.revision) for h in hits}
+                    def keep(ref):
+                        return (ref.family, ref.artifact_id, ref.revision) in allowed
+                    result = replace(result, hits=hits,
+                        matches=tuple(item for item in result.matches if keep(item.artifact_ref)),
+                        artifacts=tuple(item for item in result.artifacts if keep(item.as_ref())))
                 if span is not None:
                     span.set_attributes({
                         _MEMORY_SEARCH_MODE: result.mode,
@@ -3639,7 +3779,7 @@ class ScopedTopicMemoryApplication:
             self.scope_id,
             embedding_purpose=ModelUsagePurpose.TOPIC_MEMORY_RECALL,
         ):
-            return await searcher.search_legacy(
+            result = await searcher.search_legacy(
                 self.scope_id,
                 request.query,
                 limit=request.limit,
@@ -3649,6 +3789,33 @@ class ScopedTopicMemoryApplication:
                 allow_embedding=allow_embedding,
                 execution_context=execution_context,
             )
+            if not result.hits:
+                return result
+            from powercontext.builtin.sources.availability import (
+                availability_from_entries, lineage_has_available_source,
+            )
+
+            async with self._runtime._context(self.scope_id) as context:
+                states = availability_from_entries(await context.sources.journal.entries())
+            if not states:
+                return result
+            get_topic = self._runtime._topic_memory_get
+            if get_topic is None:
+                return result
+            surviving = []
+            for hit in result.hits:
+                published = await get_topic(self.scope_id, hit.artifact_ref)
+                if lineage_has_available_source(published.topic.lineage, states):
+                    surviving.append(hit)
+            refs = {(hit.artifact_ref.family, hit.artifact_ref.artifact_id,
+                     hit.artifact_ref.revision) for hit in surviving}
+            def retained(ref):
+                return (ref.family, ref.artifact_id, ref.revision) in refs
+            return result.model_copy(update={
+                "hits": tuple(surviving),
+                "matches": tuple(item for item in result.matches if retained(item.artifact_ref)),
+                "artifacts": tuple(item for item in result.artifacts if retained(item.as_ref())),
+            })
 
     async def get(self, request: GetTopicMemoryRequest, /) -> PublishedTopicMemory:
         if self._runtime._topic_memory_get is None:
@@ -3915,6 +4082,8 @@ class BuiltinRuntime:
         extraction_diagnostics: ExtractionDiagnostics | None = None,
         code_service: CodeService | None = None,
         source_window_limit: int = 100,
+        memory_source_count_threshold: int | None = None,
+        topic_memory_source_count_threshold: int | None = None,
         context_assembly_max_entries: int = 8,
         recall_sufficiency_policy: RecallSufficiencyPolicy | None = None,
         recall_embedding_timeout_seconds: float = 0.5,
@@ -4060,6 +4229,10 @@ class BuiltinRuntime:
         self._scheduled_source_runner = scheduled_source_runner
         self._scheduled_experience_runner = scheduled_experience_runner
         self.source_window_limit = source_window_limit
+        self.memory_source_count_threshold = memory_source_count_threshold
+        self.topic_memory_source_count_threshold = topic_memory_source_count_threshold
+        self._source_scope_ids = scope_ids
+        self._count_trigger_tasks: dict[str, asyncio.Task[None]] = {}
         self.context_assembly_max_entries = context_assembly_max_entries
         self.recall_sufficiency_policy = recall_sufficiency_policy
         self.recall_embedding_timeout_seconds = recall_embedding_timeout_seconds
@@ -4311,6 +4484,72 @@ class BuiltinRuntime:
             self._dream_service.attest_candidate = attest_candidate
             self._dream_service.authorize_candidate = authorize_candidate
 
+    def notify_source_captured(self, scope_id: str) -> None:
+        """Wake count-based processing without delaying a committed Source receipt.
+
+        The decision is made against persistent head/cursor data, not an
+        in-memory count. Replays and restarts never double-consume a window.
+        """
+        if (
+            self._closing or self._closed
+            or (self.memory_source_count_threshold is None and self.topic_memory_source_count_threshold is None)
+            or scope_id in self._count_trigger_tasks
+        ):
+            return
+        task = asyncio.create_task(self._run_source_count_trigger(scope_id))
+        self._count_trigger_tasks[scope_id] = task
+        task.add_done_callback(lambda finished, key=scope_id: self._count_trigger_tasks.pop(key, None))
+
+    async def resume_source_count_triggers(self) -> None:
+        """Reconcile unconsumed journal heads after restart without changing time jobs."""
+        if (
+            self._source_scope_ids is None
+            or (self.memory_source_count_threshold is None and self.topic_memory_source_count_threshold is None)
+        ):
+            return
+        for scope_id in await self._source_scope_ids():
+            self.notify_source_captured(scope_id)
+
+    async def _run_source_count_trigger(self, scope_id: str) -> None:
+        from sqlalchemy import select
+
+        from powercontext.builtin.persistence.tables import SOURCE_JOURNAL_HEADS_TABLE
+
+        try:
+            if self._primary_database is None:
+                return
+            async with self._primary_database.transaction() as connection:
+                head = await connection.scalar(
+                    select(SOURCE_JOURNAL_HEADS_TABLE.c.position).where(
+                        SOURCE_JOURNAL_HEADS_TABLE.c.scope_id == scope_id
+                    )
+                ) or 0
+            if self.memory_source_count_threshold is not None and self._capabilities.memory_extraction:
+                # The durable cursor is advanced only by successful window commits.
+                for _ in range(32):
+                    if self._closing or self._closed:
+                        break
+                    before = (await self.atomic_memory.for_scope(scope_id).cursor()).sequence if self.atomic_memory else 0
+                    if head - before < self.memory_source_count_threshold:
+                        break
+                    result = await self._flush_sources(scope_id)
+                    after = (await self.atomic_memory.for_scope(scope_id).cursor()).sequence if self.atomic_memory else 0
+                    if not result.processed or after <= before:
+                        break
+            if self.topic_memory_source_count_threshold is not None and self._topic_memory_processing_available:
+                status = await self.topic_memory.for_scope(scope_id).processing_status()
+                if status.source_head - status.source_cursor >= self.topic_memory_source_count_threshold:
+                    await self.topic_memory.for_scope(scope_id).flush()
+        except asyncio.CancelledError:
+            raise
+        except Exception as error:
+            # The capture already committed. The next capture, explicit flush,
+            # time job or next startup can retry the same persisted frontier.
+            log_safely(
+                logger, logging.WARNING, "Source count trigger failed", exc_info=error,
+                extra={"event": "source_count.trigger.failure", "scope_id": scope_id},
+            )
+
     async def close(self) -> None:
         """Stop accepting work and await in-flight operations without closing the provider."""
 
@@ -4397,7 +4636,9 @@ class BuiltinRuntime:
     ) -> AsyncIterator[None]:
         scope = validate_scope_id(scope_id)
         async with self._scope_operation(scope), self._generation_slot(generation_purpose is not None):
-            with bind_usage_reporter(
+            from powercontext.builtin.inference.singleflight_cache import bind_embedding_scope
+
+            with bind_embedding_scope(scope), bind_usage_reporter(
                 self.statistics.for_scope(scope).record_model_usage,
                 generation_purpose=generation_purpose,
                 embedding_purpose=embedding_purpose,

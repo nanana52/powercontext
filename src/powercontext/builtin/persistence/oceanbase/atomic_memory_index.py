@@ -358,8 +358,37 @@ class OceanBaseAtomicMemoryIndex(RelationalAtomicMemoryIndex):
         if need_vector and self.profile is not None:
             statement = statement.bindparams(bindparam("query_vector", type_=VECTOR(self.profile.dimension)))
         result_rows = tuple((await connection.execute(statement, parameters)).mappings())
-        fts_rows = (row for row in result_rows if row["channel"] == "fts")
-        vector_rows = (row for row in result_rows if row["channel"] == "vector")
+        if len(streams) == 1:
+            # A single SQL candidate stream has an unambiguous channel.
+            # Preserve compatibility with legacy mappings lacking a tag.
+            single_channel = (
+                "fts" if streams[0].startswith("SELECT 'fts' AS channel")
+                else "vector"
+            )
+            if any(
+                row.get("channel", single_channel) != single_channel
+                for row in result_rows
+            ):
+                raise AtomicMemoryIndexError(
+                    "oceanbase", "Unexpected candidate channel"
+                )
+            fts_rows = result_rows if single_channel == "fts" else ()
+            vector_rows = result_rows if single_channel == "vector" else ()
+        else:
+            # Mixed retrieval must retain explicit, valid channel identity.
+            if any(
+                row.get("channel") not in ("fts", "vector")
+                for row in result_rows
+            ):
+                raise AtomicMemoryIndexError(
+                    "oceanbase", "Missing or invalid candidate channel"
+                )
+            fts_rows = (
+                row for row in result_rows if row["channel"] == "fts"
+            )
+            vector_rows = (
+                row for row in result_rows if row["channel"] == "vector"
+            )
         return AtomicMemorySearchChannels(
             fts=atomic_memory_channel_hits(fts_rows),
             vector=atomic_memory_channel_hits(vector_rows, vector=True),

@@ -38,6 +38,9 @@ class CoalescingEmbeddingModel:
         self.coalesce_ms = float(coalesce_ms)
         self.cache_size = cache_size
         self._cache: OrderedDict[tuple[str, str], tuple[float, ...]] = OrderedDict()
+        # Logical access order includes cache hits and in-flight misses.
+        self._last_access: dict[tuple[str, str], int] = {}
+        self._access_tick = 0
         self._pending: dict[tuple[str, str], asyncio.Future[_Completed]] = {}
         self._queue: list[tuple[str, str]] = []
         self._dispatching = False
@@ -60,6 +63,9 @@ class CoalescingEmbeddingModel:
         async with self._lock:
             for text in texts:
                 key = (mode, text)
+                if self.cache_size:
+                    self._access_tick += 1
+                    self._last_access[key] = self._access_tick
                 vector = self._cache.get(key)
                 if vector is not None:
                     self._cache.move_to_end(key)
@@ -80,20 +86,6 @@ class CoalescingEmbeddingModel:
 
         # Shield each shared Future. Cancellation affects only this caller.
         completed = await asyncio.gather(*(asyncio.shield(fut) for fut in pending))
-        # LRU access order follows the caller's ORIGINAL text order rather than
-        # the provider's deduplicated batch order. This matters for duplicate
-        # positions and when cache hits are mixed with pending misses.
-        # Successful vectors are replayed; errors and cancelled calls never
-        # reach this block. The provider worker still caches successful work
-        # when every waiter has been cancelled.
-        if self.cache_size:
-            async with self._lock:
-                for text, item in zip(texts, completed, strict=True):
-                    key = (mode, text)
-                    self._cache[key] = item.vector
-                    self._cache.move_to_end(key)
-                    while len(self._cache) > self.cache_size:
-                        self._cache.popitem(last=False)
         counted: set[object] = set()
         requests = 0
         input_tokens: int | None = None
@@ -170,6 +162,8 @@ class CoalescingEmbeddingModel:
                     future = self._pending.pop(key, None)
                     if future is not None and not future.done():
                         future.set_exception(error)
+                    if key not in self._cache:
+                        self._last_access.pop(key, None)
                 self._queue.clear()
             if isinstance(error, asyncio.CancelledError):
                 raise
@@ -200,18 +194,27 @@ class CoalescingEmbeddingModel:
                 for key, vector in zip(batch, vectors, strict=True):
                     if self.cache_size:
                         self._cache[key] = vector
-                        self._cache.move_to_end(key)
-                        while len(self._cache) > self.cache_size:
-                            self._cache.popitem(last=False)
                     future = self._pending.pop(key, None)
                     if future is not None and not future.done():
                         future.set_result(_Completed(vector, batch_id, answer.usage))
+                if self.cache_size:
+                    # Provider batches can finish out of order. Keep true
+                    # request-time LRU order, not callback completion order.
+                    self._cache = OrderedDict(sorted(
+                        self._cache.items(),
+                        key=lambda entry: self._last_access[entry[0]],
+                    ))
+                    while len(self._cache) > self.cache_size:
+                        evicted, _ = self._cache.popitem(last=False)
+                        self._last_access.pop(evicted, None)
         except BaseException as error:
             async with self._lock:
                 for key in batch:
                     future = self._pending.pop(key, None)
                     if future is not None and not future.done():
                         future.set_exception(error)
+                    if key not in self._cache:
+                        self._last_access.pop(key, None)
 
 
 __all__ = ["CoalescingEmbeddingModel"]

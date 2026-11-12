@@ -184,6 +184,15 @@ class CoalescingEmbeddingModel:
                 answer = await self._model.embed(unique)
             if len(answer.vectors) != len(batch):
                 raise ValueError("Embedding provider returned an unexpected vector count")
+            # Snapshot usage immediately: providers can reuse a mutable usage object.
+            usage = (
+                InferenceUsage(
+                    requests=answer.usage.requests,
+                    input_tokens=answer.usage.input_tokens,
+                    output_tokens=answer.usage.output_tokens,
+                )
+                if answer.usage is not None else None
+            )
             vectors = tuple(tuple(float(x) for x in vector) for vector in answer.vectors)
             if any(
                 len(vector) != self.profile.dimension or not all(math.isfinite(x) for x in vector)
@@ -196,7 +205,7 @@ class CoalescingEmbeddingModel:
                         self._cache[key] = vector
                     future = self._pending.pop(key, None)
                     if future is not None and not future.done():
-                        future.set_result(_Completed(vector, batch_id, answer.usage))
+                        future.set_result(_Completed(vector, batch_id, usage))
                 if self.cache_size:
                     # Provider batches can finish out of order. Keep true
                     # request-time LRU order, not callback completion order.

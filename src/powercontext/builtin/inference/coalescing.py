@@ -111,24 +111,45 @@ class CoalescingEmbeddingModel:
         task = asyncio.create_task(coro)
         self._workers.add(task)
         task.add_done_callback(self._workers.discard)
+        task.add_done_callback(self._consume_unobserved_task_error)
+
+    @staticmethod
+    def _consume_unobserved_task_error(task: asyncio.Task[None]) -> None:
+        # Provider failures are delivered to shared futures; internal dispatcher
+        # errors must also be observed rather than logged on a GC cycle.
+        if not task.cancelled():
+            task.exception()
 
     async def _dispatch(self) -> None:
-        # Even at zero, one turn of the event loop admits concurrent callers.
+        """Dispatch bounded batches without a global provider semaphore.
+
+        Each new dispatch cycle admits one coalescing window, including when
+        fresh keys arrive while older batches are in flight. A slow provider
+        batch never prevents other batches from starting.
+        """
         try:
-            await asyncio.sleep(self.coalesce_ms / 1000)
             while True:
+                # sleep(0) is intentional for coalesce_ms=0: concurrent tasks
+                # get one event-loop turn to register their shared keys.
+                await asyncio.sleep(self.coalesce_ms / 1000)
                 async with self._lock:
                     if not self._queue:
                         return
-                    # Every queued text remains pending until its own batch finishes.
                     mode = self._queue[0][0]
                     batch = [key for key in self._queue if key[0] == mode][:self.max_batch_size]
                     selected = set(batch)
                     self._queue = [key for key in self._queue if key not in selected]
-                # An unrelated slow/erroring batch cannot block later batches.
                 self._start_task(self._run_batch(batch))
-                # Yield between batches for fairness and late requests.
-                await asyncio.sleep(0)
+        except BaseException as error:
+            # An internal dispatcher crash must not strand queued callers.
+            async with self._lock:
+                for key in self._queue:
+                    future = self._pending.pop(key, None)
+                    if future is not None and not future.done():
+                        future.set_exception(error)
+                self._queue.clear()
+            if isinstance(error, asyncio.CancelledError):
+                raise
         finally:
             async with self._lock:
                 self._dispatching = False

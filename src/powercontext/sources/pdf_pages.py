@@ -156,52 +156,115 @@ def _query_weights(question: str) -> dict[str, float]:
             for word in synonyms:
                 word = _stem(word)
                 if word not in _STOP:
-                    weights[word] = max(weights.get(word, 0.0), 0.28)
+                    weights[word] = max(weights.get(word, 0.0), 0.65)
     return weights
 
 
 def _statement_targets(question: str) -> tuple[str, ...]:
+    """Map generic business concepts to filing sections, never to fixed pages."""
     lower = question.casefold()
     targets: list[str] = []
-    if any(x in lower for x in ("cash flow", "cash flows", "capex", "capital expenditure", "depreciation", "amortization")):
+    if any(x in lower for x in (
+        "cash flow", "capex", "capital expenditure", "depreciation", "amortization",
+        "free cash", "operating cash", "cash from operations",
+    )):
         targets.append("cash")
-    if any(x in lower for x in ("income statement", "profit and loss", "p&l", "operating income", "ebitda", "revenue", "margin", "earnings")):
+    if any(x in lower for x in (
+        "income statement", "profit and loss", "p&l", "operating income",
+        "ebitda", "revenue", "sales", "margin", "earnings", "operating profit",
+    )):
         targets.append("income")
-    if any(x in lower for x in ("balance sheet", "asset", "liabilities", "debt", "equity", "working capital")):
+    if any(x in lower for x in (
+        "balance sheet", "asset", "liabilities", "debt", "equity", "working capital",
+    )):
         targets.append("balance")
-    return tuple(targets)
+    if any(x in lower for x in ("legal", "litigation", "lawsuit", "proceeding", "battles")):
+        targets.append("legal")
+    if any(x in lower for x in ("geograph", "region", "territor", "countries", "segments")):
+        targets.append("geography")
+    if "restructur" in lower or "reorganization" in lower:
+        targets.append("restructuring")
+    return tuple(dict.fromkeys(targets))
 
 
 def _statement_relevance(text: str, target: str) -> float:
-    lower = text.casefold()
+    """Give actual statement/section headings priority over passing mentions.
+
+    The same phrases apply to any annual report; nothing depends on document ID,
+    company name, a FinanceBench label, or a known evidence page.
+    """
+    head = text[:850]
+    opening = text[:180]
     if target == "cash":
-        return (4.5 if "statement" in lower and "cash flow" in lower else 0.0) + (
-            1.6 if "net cash provided" in lower or "net cash used" in lower else 0.0
-        )
+        return (60.0 if any(x in opening for x in (
+            "statement of cash flows", "statements of cash flows", "cash flow statement",
+        )) else 15.0 if any(x in head for x in (
+            "statement of cash flows", "statements of cash flows",
+            "cash flow statement", "statement of cashflow",
+        )) else 0.0) + (2.0 if "net cash provided" in text else 0.0)
     if target == "income":
-        return (4.5 if "statement" in lower and ("operation" in lower or "income" in lower) else 0.0) + (
-            1.6 if "cost of sales" in lower or "net sales" in lower else 0.0
+        return (60.0 if any(x in opening for x in (
+            "statement of income", "statements of income", "statement of operations",
+            "statements of operations", "statement of earnings",
+        )) else 15.0 if any(x in head for x in (
+            "statement of income", "statements of income", "statement of operations",
+            "statements of operations", "statement of earnings", "income statement",
+        )) else 0.0) + (1.8 if "net sales" in text or "net revenue" in text else 0.0)
+    if target == "balance":
+        return (60.0 if any(x in opening for x in (
+            "balance sheets", "balance sheet", "statements of financial position",
+        )) else 15.0 if any(x in head for x in (
+            "balance sheets", "balance sheet", "statements of financial position",
+        )) else 0.0) + (1.8 if "total assets" in text and "liabilit" in text else 0.0)
+    if target == "legal":
+        return (17.0 if "legal proceedings" in head else 0.0) + (
+            3.0 if any(x in text for x in ("legal proceedings", "pending litigation", "litigation")) else 0.0
         )
-    return (4.5 if "balance sheet" in lower else 0.0) + (
-        1.6 if "total assets" in lower and "liabilities" in lower else 0.0
-    )
+    if target == "geography":
+        return (12.0 if any(x in head for x in (
+            "geographic areas", "geographical information", "business segments",
+            "reportable segments", "segment information", "our segments",
+        )) else 0.0) + (2.0 if "geographic" in text else 0.0)
+    if target == "restructuring":
+        return (12.0 if any(x in head for x in (
+            "restructuring charges", "restructuring and", "restructuring costs",
+            "restructuring expenses",
+        )) else 0.0) + (2.0 if "restructuring" in text else 0.0)
+    return 0.0
+
+
+def _proximity_relevance(tokens: list[str], weighted_terms: dict[str, float]) -> float:
+    """Reward overlapping evidence terms in the same local paragraph/table.
+
+    Pure page-level bag-of-words rank is noisy on hundreds of dense 10-K pages.
+    This bounded sliding-window signal does not rely on any reference answers.
+    """
+    if not tokens or not weighted_terms:
+        return 0.0
+    if len(tokens) < 200:
+        window = set(tokens)
+        return sum(weight for term, weight in weighted_terms.items() if term in window)
+    best = 0.0
+    for start in range(0, len(tokens), 90):
+        window = set(tokens[start:start + 190])
+        score = sum(weight for term, weight in weighted_terms.items() if term in window)
+        if score > best:
+            best = score
+    return best
 
 
 async def search_pdf_pages(memory, question: str, limit: int = 10):
-    """Rank real persisted PDF page citations using scoped public Memory APIs.
+    """Rank persisted scoped PDF citations using several generic evidence signals.
 
-    A full natural-language question is not a good single FTS query for a long
-    annual report.  Search gives index-backed seeds; list supplies the complete
-    scoped page corpus so short, rare evidence and multi-statement questions
-    cannot disappear at the candidate-generation stage.  Both APIs only expose
-    actual persisted Memory entries, whose citations are returned unchanged.
+    The result is always a real MemoryCitation; only the memory public search and
+    list APIs are used. Scores use the submitted question and stored page text,
+    never reference answers, labels, page numbers, or an external index.
     """
     from powercontext.builtin.runtime import SearchMemoryRequest
     from powercontext.builtin.artifacts.memory.models import MemoryCitation
 
     if limit <= 0:
         return ()
-    # Preserve the native search channel and its exact persistent identities.
     found = await memory.search(SearchMemoryRequest(
         query=question, mode="fts", limit=max(100, min(limit * 6, 200)),
     ))
@@ -209,93 +272,111 @@ async def search_pdf_pages(memory, question: str, limit: int = 10):
         (hit.memory_ref.artifact_id, hit.entry_id, hit.entry_version_id): rank
         for rank, hit in enumerate(found.hits)
     }
-
     page = await memory.list()
     entries = [
         record for record in page.entries
         if any(ref.source_type == "pdf-page" for ref in record.entry.sources)
     ]
     if not entries:
-        # Compatible fallback for Memory backends with search but no page entries.
         seen: set[tuple[str, str, str]] = set()
-        output: list[MemoryCitation] = []
+        citations: list[MemoryCitation] = []
         for hit in found.hits:
             key = (hit.memory_ref.artifact_id, hit.entry_id, hit.entry_version_id)
-            if key in seen:
-                continue
-            seen.add(key)
-            output.append(MemoryCitation(memory_ref=hit.memory_ref,
-                                         entry_id=hit.entry_id,
-                                         entry_version_id=hit.entry_version_id))
-            if len(output) >= limit:
+            if key not in seen:
+                seen.add(key)
+                citations.append(MemoryCitation(memory_ref=hit.memory_ref,
+                                                entry_id=hit.entry_id,
+                                                entry_version_id=hit.entry_version_id))
+            if len(citations) == limit:
                 break
-        return tuple(output)
+        return tuple(citations)
 
-    term_weights = _query_weights(question)
+    terms = _query_weights(question)
     targets = _statement_targets(question)
-    count_by_document: list[Counter[str]] = []
-    lengths: list[int] = []
-    frequency: Counter[str] = Counter()
-    for record in entries:
-        terms = Counter(_tokens(record.entry.text))
-        count_by_document.append(terms)
-        lengths.append(sum(terms.values()))
-        frequency.update(terms.keys())
-    average_length = max(1, sum(lengths) / len(lengths))
+    token_lists = [_tokens(record.entry.text) for record in entries]
+    counters = [Counter(toks) for toks in token_lists]
+    lengths = [len(toks) for toks in token_lists]
     document_count = len(entries)
+    average_length = max(1.0, sum(lengths) / document_count)
+    df: Counter[str] = Counter()
+    for counter in counters:
+        df.update(counter.keys())
     idf = {
-        term: math.log1p((document_count - frequency.get(term, 0) + 0.5) /
-                         (frequency.get(term, 0) + 0.5))
-        for term in term_weights
+        term: math.log1p((document_count - df.get(term, 0) + 0.5) /
+                         (df.get(term, 0) + 0.5))
+        for term in terms
     }
-    scores: list[float] = []
-    group_scores: dict[str, list[float]] = {target: [] for target in targets}
+    prox_weights = {term: weight * idf[term] for term, weight in terms.items()}
+    prox_max = sum(prox_weights.values()) or 1.0
+    full_scores: list[float] = []
+    text_scores: list[float] = []
+    section_scores: dict[str, list[float]] = {target: [] for target in targets}
     for index, record in enumerate(entries):
-        freq = count_by_document[index]
+        count = counters[index]
         norm = 1.2 * (0.25 + 0.75 * lengths[index] / average_length)
-        lexical = sum(
-            weight * idf[term] * (count * 2.2) / (count + norm)
-            for term, weight in term_weights.items()
-            if (count := freq.get(term, 0))
+        bm25 = sum(
+            weight * idf[term] * (freq * 2.2) / (freq + norm)
+            for term, weight in terms.items() if (freq := count.get(term, 0))
         )
-        present = sum(weight for term, weight in term_weights.items() if freq.get(term))
-        coverage = present / max(sum(term_weights.values()), 1.0)
-        score = lexical + 2.0 * coverage
+        covered = sum(weight for term, weight in terms.items() if count.get(term))
+        coverage = covered / (sum(terms.values()) or 1.0)
+        proximity = _proximity_relevance(token_lists[index], prox_weights) / prox_max
+        plain = bm25 + 2.5 * coverage + 4.0 * proximity
         key = (record.memory_ref.artifact_id, record.entry.entry_id, record.entry.entry_version_id)
         if key in fts_ranks:
-            score += 1.6 / math.sqrt(1 + fts_ranks[key])
-        # Exact multiword accounting labels are stronger than isolated words.
+            plain += 2.0 / math.sqrt(1.0 + fts_ranks[key])
         lower = record.entry.text.casefold()
-        for phrase in ("cash flows", "operating income", "net revenues", "net sales",
-                       "balance sheets", "total assets", "capital expenditures",
-                       "depreciation and amortization", "legal proceedings"):
+        for phrase in (
+            "cash flows", "operating income", "net revenues", "net sales",
+            "balance sheets", "total assets", "capital expenditures",
+            "depreciation and amortization", "legal proceedings", "geographic areas",
+            "restructuring charges",
+        ):
             if phrase in question.casefold() and phrase in lower:
-                score += 1.3
-        scores.append(score)
-        for target in targets:
-            group_scores[target].append(score + _statement_relevance(lower, target))
+                plain += 2.0
+        text_scores.append(plain)
+        category = {target: _statement_relevance(lower, target) for target in targets}
+        # Target sections receive attention without allowing an unrelated table
+        # title to overwhelm every lexical match.
+        full_scores.append(plain + min(5.0, max(category.values(), default=0.0) * 0.30))
+        for target, bonus in category.items():
+            section_scores[target].append(plain + bonus)
 
     selected: list[int] = []
-    selected_sources: set[tuple[str, str]] = set()
+    seen_sources: set[tuple[str, str]] = set()
 
     def choose(index: int) -> None:
         record = entries[index]
         source = next(ref for ref in record.entry.sources if ref.source_type == "pdf-page")
         key = (source.source_type, source.source_id)
-        if key not in selected_sources:
-            selected_sources.add(key)
+        if key not in seen_sources:
+            seen_sources.add(key)
             selected.append(index)
 
-    # Reserve a few candidates for each financial statement needed to answer a
-    # multi-statement question; otherwise BM25 over a long report over-focuses
-    # on just one side of a ratio.
-    if len(targets) > 1 and limit >= len(targets) * 2:
-        per_target = min(4, max(2, limit // (len(targets) * 3)))
+    # Guarantee representation of different statement families needed for
+    # multi-table calculations, even when one statement dominates BM25.
+    if targets and limit >= 8:
+        per_target = min(4, max(1, limit // (max(1, len(targets)) * 5)))
         for target in targets:
-            for index in sorted(range(document_count),
-                                key=lambda i: group_scores[target][i], reverse=True)[:per_target]:
+            order = sorted(range(document_count), key=lambda i: section_scores[target][i], reverse=True)
+            for index in order[:per_target]:
                 choose(index)
-    for index in sorted(range(document_count), key=lambda i: scores[i], reverse=True):
+
+    # Complement lexical rank with the index-backed search channel. This
+    # provides a second retrieval path when either tokenizer misses a synonym.
+    if limit >= 10:
+        index_ranks = sorted(
+            (i for i, record in enumerate(entries)
+             if (record.memory_ref.artifact_id, record.entry.entry_id,
+                 record.entry.entry_version_id) in fts_ranks),
+            key=lambda i: fts_ranks[(entries[i].memory_ref.artifact_id,
+                                     entries[i].entry.entry_id,
+                                     entries[i].entry.entry_version_id)],
+        )
+        for index in index_ranks[:min(3, limit // 6)]:
+            choose(index)
+
+    for index in sorted(range(document_count), key=lambda i: full_scores[i], reverse=True):
         if len(selected) >= limit:
             break
         choose(index)

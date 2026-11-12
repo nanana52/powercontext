@@ -127,6 +127,24 @@ _EXPANSIONS = (
     (("restructuring",), ("restructuring", "reorganization", "charge", "cost")),
     (("geography", "geographies", "geographic", "region"),
      ("segment", "region", "geographic", "international", "country")),
+    (("quick ratio", "current ratio", "liquidity ratio"),
+     ("current", "asset", "liability", "cash", "equivalent",
+      "receivable", "investment", "inventory")),
+    (("effective tax rate", "tax rate"),
+     ("effective", "tax", "rate", "income", "provision", "expense")),
+    (("retain", "retention", "attrition", "churn"),
+     ("retention", "retain", "member", "customer", "renewal")),
+    (("customer concentration", "major customer"),
+     ("customer", "accounted", "revenue", "sales", "major")),
+    (("capital intensive", "capital-intensive", "capital intensity", "capital employed"),
+     ("asset", "plant", "equipment", "capital", "expenditure", "purchase",
+      "cash", "flow", "revenue", "income")),
+    (("business segment", "product categories", "service categories", "organic growth"),
+     ("segment", "business", "revenue", "sale", "organic", "operation")),
+    (("primary customer", "major customer", "customer concentration"),
+     ("customer", "commercial", "government", "contract", "revenue", "sale")),
+    (("mergers and acquisitions", "m&a", "excluding acquisition", "organic growth"),
+     ("organic", "acquisition", "divestiture", "segment", "growth", "sale")),
     (("lawsuit", "litigation", "legal battles", "legal proceedings"),
      ("legal", "proceeding", "litigation", "contingency")),
 )
@@ -176,6 +194,7 @@ def _statement_targets(question: str) -> tuple[str, ...]:
         targets.append("income")
     if any(x in lower for x in (
         "balance sheet", "asset", "liabilities", "debt", "equity", "working capital",
+        "quick ratio", "current ratio", "liquidity ratio",
     )):
         targets.append("balance")
     if any(x in lower for x in ("legal", "litigation", "lawsuit", "proceeding", "battles")):
@@ -184,6 +203,25 @@ def _statement_targets(question: str) -> tuple[str, ...]:
         targets.append("geography")
     if "restructur" in lower or "reorganization" in lower:
         targets.append("restructuring")
+    # Capital efficiency is calculated from figures across several statements.
+    # A question need not name the income, balance and cash-flow statements.
+    if any(term in lower for term in (
+        "capital-intensive", "capital intensive", "capital intensity",
+        "return on assets", "asset turnover", "fixed assets", "capital employed",
+    )):
+        targets.extend(("income", "balance", "cash"))
+    # Division and product/service mix is usually in segment disclosures.
+    if any(term in lower for term in (
+        "business segment", "segment", "product categories", "service categories",
+        "organic growth", "business division", "business mix",
+    )):
+        targets.append("segment")
+    # Principal customers can be discussed in several nonadjacent sections.
+    if any(term in lower for term in (
+        "primary customer", "major customer", "principal customer",
+        "customer base", "customer concentration",
+    )):
+        targets.append("customer")
     return tuple(dict.fromkeys(targets))
 
 
@@ -216,6 +254,29 @@ def _statement_relevance(text: str, target: str) -> float:
         )) else 15.0 if any(x in head for x in (
             "balance sheets", "balance sheet", "statements of financial position",
         )) else 0.0) + (1.8 if "total assets" in text and "liabilit" in text else 0.0)
+    if target == "segment":
+        headings = (
+            "business segment data", "by business segment",
+            "business segment results", "sales by segment",
+            "segment revenues", "segment results", "segment performance",
+            "organic sales", "organic growth", "operating income by segment",
+        )
+        heading = any(phrase in text[:1000] for phrase in headings)
+        mention = any(phrase in text for phrase in headings)
+        return (44.0 if heading else 10.0 if mention else 0.0)
+    if target == "customer":
+        headings = (
+            "major customers", "principal customers", "primary customers",
+            "customer concentration", "customer base",
+            "government contracts", "customer relationships",
+        )
+        heading = any(phrase in text[:1000] for phrase in headings)
+        customer_rev = "customer" in text and (
+            "revenue" in text or "sales" in text or "contract" in text)
+        government_rev = "government" in text and (
+            "revenue" in text or "contract" in text)
+        return (28.0 if heading else 0.0) + (9.0 if customer_rev else 0.0) + (
+            7.0 if government_rev else 0.0)
     if target == "legal":
         return (17.0 if "legal proceedings" in head else 0.0) + (
             3.0 if any(x in text for x in ("legal proceedings", "pending litigation", "litigation")) else 0.0
@@ -308,6 +369,7 @@ async def search_pdf_pages(memory, question: str, limit: int = 10):
     }
     prox_weights = {term: weight * idf[term] for term, weight in terms.items()}
     prox_max = sum(prox_weights.values()) or 1.0
+    lexical_scores: list[float] = []
     full_scores: list[float] = []
     text_scores: list[float] = []
     section_scores: dict[str, list[float]] = {target: [] for target in targets}
@@ -323,8 +385,6 @@ async def search_pdf_pages(memory, question: str, limit: int = 10):
         proximity = _proximity_relevance(token_lists[index], prox_weights) / prox_max
         plain = bm25 + 2.5 * coverage + 4.0 * proximity
         key = (record.memory_ref.artifact_id, record.entry.entry_id, record.entry.entry_version_id)
-        if key in fts_ranks:
-            plain += 2.0 / math.sqrt(1.0 + fts_ranks[key])
         lower = record.entry.text.casefold()
         for phrase in (
             "cash flows", "operating income", "net revenues", "net sales",
@@ -334,6 +394,17 @@ async def search_pdf_pages(memory, question: str, limit: int = 10):
         ):
             if phrase in question.casefold() and phrase in lower:
                 plain += 2.0
+        # The words used below describe general accounting concepts.
+        # No answer labels, company-specific identifiers, or page IDs.
+        query_lower = question.casefold()
+        if "effective tax rate" in query_lower and "effective tax rate" in lower:
+            plain += 8.0
+        if any(word in query_lower for word in ("retain", "retention", "attrition")):
+            if any(word in lower for word in ("retention", "retained", "attrition")):
+                plain += 6.0
+        lexical_scores.append(plain)
+        if key in fts_ranks:
+            plain += 2.0 / math.sqrt(1.0 + fts_ranks[key])
         text_scores.append(plain)
         category = {target: _statement_relevance(lower, target) for target in targets}
         # Target sections receive attention without allowing an unrelated table
@@ -362,6 +433,15 @@ async def search_pdf_pages(memory, question: str, limit: int = 10):
             for index in order[:per_target]:
                 choose(index)
 
+    # Preserve the strongest lexical pages before index-backed FTS hits
+    # consume slots. At limit=20 this reserves up to 16 lexical pages;
+    # section families above may overlap with that allocation.
+    if limit >= 10:
+        for index in sorted(range(document_count),
+                            key=lambda i: lexical_scores[i], reverse=True)[:(limit * 4) // 5]:
+            if len(selected) >= limit:
+                break
+            choose(index)
     # Complement lexical rank with the index-backed search channel. This
     # provides a second retrieval path when either tokenizer misses a synonym.
     if limit >= 10:

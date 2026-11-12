@@ -76,6 +76,7 @@ from powercontext.builtin.evidence.resolver import AuthorizationContext
 from powercontext.builtin.handoff_report.adapters import RuntimeHandoffReadAdapter
 from powercontext.builtin.handoff_report.application import HandoffReportApplication
 from powercontext.builtin.inference import EmbeddingModel, TokenEstimator, character_token_estimator
+from powercontext.builtin.inference.coalescing import CoalescingEmbeddingModel
 from powercontext.builtin.inference.usage import (
     UsageReportingEmbeddingModel,
     UsageReportingStructuredGenerator,
@@ -477,7 +478,9 @@ async def open_builtin_runtime(
                 if isinstance(embedding_model, PydanticAIEmbeddingModel)
                 else embedding_model
             )
-        configured_embedding = _usage_reporting_embedding_model(configured_embedding_source)
+        configured_embedding = _coalesced_usage_embedding_model(
+            configured_embedding_source, max_batch_size=config.inference.embedding_batch_size,
+        )
         configured_external_skills = (
             _external_skill_provider(config.external_skills)
             if external_skill_provider is None
@@ -1693,6 +1696,16 @@ def _usage_reporting_embedding_model(model: EmbeddingModel | None) -> EmbeddingM
     if model is None or isinstance(model, UsageReportingEmbeddingModel):
         return model
     return UsageReportingEmbeddingModel(model)
+
+def _coalesced_usage_embedding_model(
+    model: EmbeddingModel | None, *, max_batch_size: int
+) -> EmbeddingModel | None:
+    """Activate cross-call coalescing before recording physical provider usage."""
+    if model is None or isinstance(model, UsageReportingEmbeddingModel):
+        return model
+    if not isinstance(model, CoalescingEmbeddingModel):
+        model = CoalescingEmbeddingModel(model, max_batch_size=max_batch_size)
+    return _usage_reporting_embedding_model(model)
 
 
 def _embedding_provider_settings(settings: InferenceConfig, dimension: int) -> dict[str, JsonValue]:

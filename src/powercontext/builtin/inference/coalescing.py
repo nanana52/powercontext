@@ -121,29 +121,38 @@ class CoalescingEmbeddingModel:
             task.exception()
 
     async def _dispatch(self) -> None:
-        """Dispatch bounded batches without a global provider semaphore.
+        """Dispatch one queue snapshot per coalescing window.
 
-        Each new dispatch cycle admits one coalescing window, including when
-        fresh keys arrive while older batches are in flight. A slow provider
-        batch never prevents other batches from starting.
+        All bounded, mode-specific batches from the same snapshot start
+        together. New keys receive a fresh window; duplicates continue to
+        join their existing in-flight Futures.
         """
+        undispatched: set[tuple[str, str]] = set()
         try:
             while True:
-                # sleep(0) is intentional for coalesce_ms=0: concurrent tasks
-                # get one event-loop turn to register their shared keys.
+                # sleep(0) still yields one turn to concurrent callers.
                 await asyncio.sleep(self.coalesce_ms / 1000)
                 async with self._lock:
                     if not self._queue:
                         return
-                    mode = self._queue[0][0]
-                    batch = [key for key in self._queue if key[0] == mode][:self.max_batch_size]
-                    selected = set(batch)
-                    self._queue = [key for key in self._queue if key not in selected]
-                self._start_task(self._run_batch(batch))
+                    queued = self._queue
+                    self._queue = []
+
+                undispatched = set(queued)
+                by_mode: dict[str, list[tuple[str, str]]] = {}
+                for key in queued:
+                    by_mode.setdefault(key[0], []).append(key)
+                for keys in by_mode.values():
+                    for start in range(0, len(keys), self.max_batch_size):
+                        batch = keys[start:start + self.max_batch_size]
+                        self._start_task(self._run_batch(batch))
+                        undispatched.difference_update(batch)
+                undispatched.clear()
         except BaseException as error:
-            # An internal dispatcher crash must not strand queued callers.
+            # A dispatcher failure must not leave any queued caller stranded.
+            # Already-started batches remain owned by their provider workers.
             async with self._lock:
-                for key in self._queue:
+                for key in (*undispatched, *self._queue):
                     future = self._pending.pop(key, None)
                     if future is not None and not future.done():
                         future.set_exception(error)

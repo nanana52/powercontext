@@ -80,6 +80,20 @@ class CoalescingEmbeddingModel:
 
         # Shield each shared Future. Cancellation affects only this caller.
         completed = await asyncio.gather(*(asyncio.shield(fut) for fut in pending))
+        # LRU access order follows the caller's ORIGINAL text order rather than
+        # the provider's deduplicated batch order. This matters for duplicate
+        # positions and when cache hits are mixed with pending misses.
+        # Successful vectors are replayed; errors and cancelled calls never
+        # reach this block. The provider worker still caches successful work
+        # when every waiter has been cancelled.
+        if self.cache_size:
+            async with self._lock:
+                for text, item in zip(texts, completed, strict=True):
+                    key = (mode, text)
+                    self._cache[key] = item.vector
+                    self._cache.move_to_end(key)
+                    while len(self._cache) > self.cache_size:
+                        self._cache.popitem(last=False)
         counted: set[object] = set()
         requests = 0
         input_tokens: int | None = None

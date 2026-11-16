@@ -8,9 +8,19 @@ if ! command -v uv >/dev/null 2>&1; then
   python3 -m pip install --user 'uv==0.9.9'
   export PATH="$HOME/.local/bin:$PATH"
 fi
-uv python install 3.12.12
+PYTHON="${DREAM_PYTHON:-}"
+if [ -z "$PYTHON" ] && command -v python3.12 >/dev/null 2>&1; then
+  PYTHON="$(command -v python3.12)"
+fi
+if [ -z "$PYTHON" ]; then
+  uv python install 3.12.12
+  PYTHON="$(uv python find 3.12.12)"
+fi
+"$PYTHON" -c 'import sys;raise SystemExit(sys.version_info[:2] != (3,12))'
+MODEL_PORT="${DREAM_MODEL_PORT:-18081}"
+BACKEND_PORT="${DREAM_BACKEND_PORT:-18090}"
 if [ ! -x "$RUNTIME/venv/bin/python" ]; then
-  uv venv --python 3.12.12 "$RUNTIME/venv"
+  uv venv --python "$PYTHON" "$RUNTIME/venv"
 fi
 uv pip install --python "$RUNTIME/venv/bin/python" -r backend/requirements.txt
 if [ ! -f "$RUNTIME/access.token" ]; then
@@ -28,20 +38,32 @@ if [ ! -x "$LLAMA/llama-b12248/llama-server" ]; then
   mkdir -p "$LLAMA"
   tar -xzf "$RUNTIME/llama.tar.gz" -C "$LLAMA"
 fi
-if ! curl -fsS http://127.0.0.1:18081/health >/dev/null 2>&1; then
-  nohup "$LLAMA/llama-b12248/llama-server" -m "$MODEL" --host 127.0.0.1 --port 18081 -c 4096 -t 4 --alias qwen-local >"$RUNTIME/logs/model.log" 2>&1 </dev/null &
+if ! curl -fsS http://127.0.0.1:$MODEL_PORT/health >/dev/null 2>&1; then
+  nohup "$LLAMA/llama-b12248/llama-server" -m "$MODEL" --host 127.0.0.1 --port "$MODEL_PORT" -c 4096 -t 4 --alias qwen-local >"$RUNTIME/logs/model.log" 2>&1 </dev/null &
   echo "$!" > "$RUNTIME/model.pid"
 fi
 export PYTHONPATH="$ROOT/vendor/powercontext/src"
 export DREAM_ACCESS_TOKEN="$(cat "$RUNTIME/access.token")"
 export DREAM_DATA_DIR="$RUNTIME/data"
-export DREAM_MODEL_URL=http://127.0.0.1:18081/v1
-if ! curl -fsS http://127.0.0.1:18090/health >/dev/null 2>&1; then
+export DREAM_MODEL_URL=http://127.0.0.1:$MODEL_PORT/v1
+if ! curl -fsS http://127.0.0.1:$BACKEND_PORT/health >/dev/null 2>&1; then
   cd "$ROOT/backend"
-  nohup "$RUNTIME/venv/bin/python" -m uvicorn app:app --host "${DREAM_LISTEN_HOST:-0.0.0.0}" --port 18090 >"$RUNTIME/logs/backend.log" 2>&1 </dev/null &
+  nohup "$RUNTIME/venv/bin/python" -m uvicorn app:app --host "${DREAM_LISTEN_HOST:-0.0.0.0}" --port "$BACKEND_PORT" >"$RUNTIME/logs/backend.log" 2>&1 </dev/null &
   echo "$!" > "$RUNTIME/backend.pid"
 fi
-echo "Backend URL for Dify Docker on Linux: http://172.17.0.1:18090"
+echo "Backend URL for Dify Docker on Linux: http://172.17.0.1:$BACKEND_PORT"
 echo "Private access token file: $RUNTIME/access.token"
-echo "Model health: http://127.0.0.1:18081/health"
-echo "Backend health: http://127.0.0.1:18090/health"
+echo "Model health: http://127.0.0.1:$MODEL_PORT/health"
+echo "Backend health: http://127.0.0.1:$BACKEND_PORT/health"
+
+for component in model backend; do
+  if [ "$component" = model ]; then port="$MODEL_PORT"; else port="$BACKEND_PORT"; fi
+  ready=0
+  for attempt in $(seq 1 90); do
+    if curl -fsS --max-time 2 "http://127.0.0.1:$port/health" >/dev/null 2>&1; then ready=1; break; fi
+    if [ -f "$RUNTIME/$component.pid" ] && ! kill -0 "$(cat "$RUNTIME/$component.pid")" 2>/dev/null; then break; fi
+    sleep 1
+  done
+  if [ "$ready" != 1 ]; then echo "$component failed; see $RUNTIME/logs/$component.log" >&2; exit 1; fi
+done
+echo "MODEL_AND_POWERCONTEXT_HEALTH_PASS"

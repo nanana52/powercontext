@@ -5,15 +5,24 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shutil
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "deployment/upstream_docker"
 RUNTIME = ROOT / ".runtime/dify"
-SELECTED = {"api", "worker", "worker_beat", "redis", "db_postgres", "sandbox",
+DEPLOYMENT = RUNTIME / "deployment"
+PROJECT = os.environ.get("DREAM_DIFY_PROJECT", "dream-lostfound")
+API_PORT = os.environ.get("DREAM_DIFY_API_PORT", "15001")
+WEB_PORT = os.environ.get("DREAM_DIFY_WEB_PORT", "13000")
+HTTP_PORT = os.environ.get("DREAM_DIFY_HTTP_PORT", "18080")
+SELECTED = {"init_permissions", "api", "worker", "worker_beat", "redis", "db_postgres", "sandbox",
             "ssrf_proxy", "plugin_daemon", "qdrant", "web", "nginx"}
 RUNTIME.mkdir(parents=True, exist_ok=True)
-environment_path = RUNTIME / ".env"
+# Service env_file paths are relative to the Compose YAML. Keep its private
+# environment beside a runtime copy, never in delivered source files.
+shutil.copytree(SOURCE, DEPLOYMENT, dirs_exist_ok=True)
+environment_path = DEPLOYMENT / ".env"
 if not environment_path.exists():
     values = {
         "DB_TYPE":"postgresql", "VECTOR_STORE":"qdrant",
@@ -38,9 +47,27 @@ if not environment_path.exists():
     lines.extend(key+"="+value for key,value in values.items() if key not in used)
     environment_path.write_text("\n".join(lines)+"\n",encoding="utf-8")
     environment_path.chmod(0o600)
-base = ["docker","compose","--project-name","dream-lostfound",
-        "--env-file",str(environment_path),"-f",str(SOURCE/"docker-compose.yaml")]
-configuration = json.loads(subprocess.check_output(base+["config","--format","json"],cwd=SOURCE))
+# The API client and sandbox must authenticate with the same generated key.
+env_lines = environment_path.read_text(encoding="utf-8").splitlines()
+sandbox_key = next(line.split("=", 1)[1] for line in env_lines if line.startswith("SANDBOX_API_KEY="))
+redis_key = next(line.split("=", 1)[1] for line in env_lines if line.startswith("REDIS_PASSWORD="))
+coordinated = {
+    "CODE_EXECUTION_API_KEY": sandbox_key,
+    "CELERY_BROKER_URL": "redis://:"+redis_key+"@redis:6379/1",
+    "COMPOSE_WORKER_HEALTHCHECK_DISABLED": "false",
+}
+env_lines = [line for line in env_lines if line.split("=", 1)[0] not in coordinated]
+env_lines.extend(key+"="+value for key, value in coordinated.items())
+environment_path.write_text("\n".join(env_lines)+"\n", encoding="utf-8")
+sandbox_conf = RUNTIME / "volumes/sandbox/conf"
+sandbox_conf.mkdir(parents=True, exist_ok=True)
+sandbox_template = (ROOT / "deployment/sandbox/config.yaml").read_text(encoding="utf-8")
+sandbox_path = sandbox_conf / "config.yaml"
+sandbox_path.write_text(sandbox_template.replace("key: dify-sandbox", "key: "+sandbox_key), encoding="utf-8")
+sandbox_path.chmod(0o600)
+base = ["docker","compose","--project-name",PROJECT,
+        "--env-file",str(environment_path),"-f",str(DEPLOYMENT/"docker-compose.yaml")]
+configuration = json.loads(subprocess.check_output(base+["config","--format","json"],cwd=DEPLOYMENT))
 services = {}
 for name in SELECTED:
     service = configuration["services"][name]
@@ -58,19 +85,19 @@ for name in SELECTED:
     if name in {"api","worker","ssrf_proxy"}:
         service.setdefault("environment",{})["SSRF_PROXY_ALLOW_PRIVATE_IPS"]="172.17.0.1/32"
     if name=="api":
-        service["ports"]=[{"target":5001,"published":"15001","host_ip":"127.0.0.1","protocol":"tcp"}]
+        service["ports"]=[{"target":5001,"published":API_PORT,"host_ip":"127.0.0.1","protocol":"tcp"}]
     elif name=="web":
-        service["ports"]=[{"target":3000,"published":"13000","host_ip":"127.0.0.1","protocol":"tcp"}]
+        service["ports"]=[{"target":3000,"published":WEB_PORT,"host_ip":"127.0.0.1","protocol":"tcp"}]
     elif name=="nginx":
-        service["ports"]=[{"target":80,"published":"18080","host_ip":"127.0.0.1","protocol":"tcp"}]
+        service["ports"]=[{"target":80,"published":HTTP_PORT,"host_ip":"127.0.0.1","protocol":"tcp"}]
     else:
         service.pop("ports",None)
     services[name]=service
 configuration["services"]=services
-configuration["name"]="dream-lostfound"
+configuration["name"]=PROJECT
 resolved=RUNTIME/"compose.resolved.json"
 resolved.write_text(json.dumps(configuration),encoding="utf-8")
 resolved.chmod(0o600)
-subprocess.run(["docker","compose","-f",str(resolved),"up","-d"],check=True)
-print("Dify: http://127.0.0.1:18080/install")
+subprocess.run(["docker","compose","-f",str(resolved),"up","-d","--wait","--wait-timeout","180"],check=True)
+print("Dify: http://127.0.0.1:"+HTTP_PORT+"/install")
 print("Initialize your own administrator account, then import dsl/dream-lostfound.yml.")

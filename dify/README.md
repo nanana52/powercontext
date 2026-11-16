@@ -47,3 +47,11 @@ Dify 工作流的模型步骤通过 HTTP 调用配套服务的 `/v1/story`，实
 `backend/app.py` 是配套 API 源码；`vendor/powercontext` 包含实际使用的 PowerContext 源码及许可证；`backend/requirements.txt` 固定运行依赖；`PROVENANCE.json` 记录上游修订、模型版本和哈希。该作品延续用户原有《梦境失物招领局》草稿，并修复了请求体、记忆字段、保存确认和运行连接等问题。
 
 模型较小，适合演示，生成内容的丰富程度有限。玩家昵称是游戏记忆的分区标识，不应作为真实身份认证使用；只输入虚构情节。数据存放于 `.runtime/data`，不要求交付任何预置记忆。
+
+## 干净部署检查
+
+后端需要 Python 3.12。若已有兼容解释器，可执行 `DREAM_PYTHON=/实际路径/python3.12 bash start_backend.sh`；脚本优先使用该解释器，否则查找 python3.12，最后才通过 uv 下载 3.12.12。启动脚本将等待模型与后端健康检查通过，失败会返回非零退出码。设置 `DREAM_MODEL_PORT`、`DREAM_BACKEND_PORT` 可调整端口，须同步调整 Dify 后端 URL。
+
+Dify 部署脚本把官方配置复制到 `.runtime/dify/deployment`，在该副本旁生成私密 `.env`，因此源码目录无需创建或交付 `.env`。该脚本保留官方 init_permissions 容器，并将 `deployment/sandbox/config.yaml` 安装到 sandbox 运行卷；该模板来自 langgenius/dify 的 1.18.0 标签，Git blob SHA 为 31b5a594b9f4a42080ba705a5de306f0f90b73a5。模板中的 dify-sandbox 是上游示例值，运行时由自动生成的 SANDBOX_API_KEY 覆盖。
+
+已有其他 Dify 服务时，可设置 `DREAM_DIFY_PROJECT`、`DREAM_DIFY_API_PORT`、`DREAM_DIFY_WEB_PORT`、`DREAM_DIFY_HTTP_PORT` 来使用独立项目和端口；不设置时保持上述默认值。所有运行数据和生成的秘密都位于 `.runtime`，无需上传。

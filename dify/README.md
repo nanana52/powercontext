@@ -55,3 +55,18 @@ Dify 工作流的模型步骤通过 HTTP 调用配套服务的 `/v1/story`，实
 Dify 部署脚本把官方配置复制到 `.runtime/dify/deployment`，在该副本旁生成私密 `.env`，因此源码目录无需创建或交付 `.env`。该脚本保留官方 init_permissions 容器，并将 `deployment/sandbox/config.yaml` 安装到 sandbox 运行卷；该模板来自 langgenius/dify 的 1.18.0 标签，Git blob SHA 为 31b5a594b9f4a42080ba705a5de306f0f90b73a5。模板中的 dify-sandbox 是上游示例值，运行时由自动生成的 SANDBOX_API_KEY 覆盖。
 
 已有其他 Dify 服务时，可设置 `DREAM_DIFY_PROJECT`、`DREAM_DIFY_API_PORT`、`DREAM_DIFY_WEB_PORT`、`DREAM_DIFY_HTTP_PORT` 来使用独立项目和端口；不设置时保持上述默认值。所有运行数据和生成的秘密都位于 `.runtime`，无需上传。
+
+
+## 一条命令完整验收
+
+在 Linux x86_64 上安装 Python 3.12、Docker Engine 和 Compose v2 后，在 dify 目录执行：
+
+```bash
+python3 scripts/verify_full_stack.py
+```
+
+该命令启动真实本地模型和 PowerContext，部署独立 Dify，首次安装时创建本地管理员，导入并发布本应用 DSL，执行两轮真实 Workflow API 请求，核对首次无历史、第二次加载历史以及两次写入均成功。成功时输出 DIFY_FULL_STACK_ACCEPTANCE_PASS。管理员密码、后端令牌和应用密钥仅在本机运行目录或内存内使用，不打印到日志，不随源码提交。
+
+验证输出保存在 .runtime/validation；本机管理员信息在 .runtime/owner.json。请保留整个 .runtime 才能在重启后继续使用同一记忆。现有本项目部署可加 --existing-deployment 仅重新导入验证；每次使用新的玩家标识，避免之前的对话影响验证。命令使用 Dify 1.18.0 的本地管理服务初始化，不能用于修改其他人的 Dify 实例。
+
+已从空数据的第三套独立部署实测通过，原始结果见 evidence/one_command_report.json、one_command_turn1.json 与 one_command_turn2.json。该结果为本地真实运行证据，平台正式评分另行确认。

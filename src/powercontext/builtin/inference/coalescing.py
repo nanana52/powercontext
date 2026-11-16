@@ -47,10 +47,10 @@ class CoalescingEmbeddingModel:
         self._workers: set[asyncio.Task[None]] = set()
         self._lock = asyncio.Lock()
 
-    async def embed(self, texts, /) -> EmbeddingResult:
+    async def embed(self, texts) -> EmbeddingResult:
         return await self._get(tuple(texts), "document")
 
-    async def embed_query(self, texts, /) -> EmbeddingResult:
+    async def embed_query(self, texts) -> EmbeddingResult:
         # Asymmetric embedding providers produce different query/document vectors.
         mode = "query" if callable(getattr(self._model, "embed_query", None)) else "document"
         return await self._get(tuple(texts), mode)

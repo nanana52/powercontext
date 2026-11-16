@@ -1,0 +1,2 @@
+PERSISTENT_MEMORY_AFTER_BACKEND_RESTART=PASS
+{"memory_count": 4, "memory_ref": {"family": "memory", "artifact_id": "memory", "revision": 4}}

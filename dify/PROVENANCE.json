@@ -1,0 +1,12 @@
+{
+  "powercontext_repository": "https://github.com/nanana52/powercontext",
+  "powercontext_commit": "301c09894e66e558e9a474755d1cd408258f32f9",
+  "official_public_test_commit": "dab240063bfcfa7917898dc44da4baadb3747bd0",
+  "dify": "1.18.0",
+  "llama_cpp_release": "b12248",
+  "model": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+  "model_file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+  "model_sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db",
+  "model_license": "Apache-2.0",
+  "model_source": "https://modelscope.cn/models/Qwen/Qwen2.5-0.5B-Instruct-GGUF"
+}

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "scope": "Default complete container;actualDifyAPI+worker,PostgreSQL,Redis,PowerContextMemory,Qwen;noexternalcredential",
+  "network": "none",
+  "startup_sec": 80.53814069699729,
+  "app_id": "177fa70b-5df6-44c8-8b6b-8f7a912f8f35",
+  "turns": [
+    {
+      "turn": 1,
+      "workflow_run_id": "32756cfc-b410-4920-9cdd-9dd332750200",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "output": "梦境失物招领局 · 夜班营业\n玩家：single-1794923695895046690｜本次失物：会说话的蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：你把会说话的蓝雨伞写信给雨伞，雨伞却说：“谢谢你，会说话的，但我会告诉你，你不是会说话的。”\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    },
+    {
+      "turn": 2,
+      "workflow_run_id": "52902441-84c8-4b13-8569-37693229aeb5",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "output": "梦境失物招领局 · 夜班营业\n玩家：single-1794923695895046690｜本次失物：会说话的蓝雨伞\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞”，做了“给雨伞写一封道歉信”。\n\n柜员说：夜班柜员，你上次登记的会说话的蓝雨伞怎么就不见了？为什么雨伞说：“谢谢你，会说话的，但我会告诉你，你不是会说话的。”？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    }
+  ],
+  "player": "single-1794923695895046690"
+}

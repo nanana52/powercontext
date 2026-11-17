@@ -1,0 +1,11 @@
+{
+  "status": "STALLED_OBSERVED",
+  "asset_files": [
+    [
+      "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      435937280
+    ]
+  ],
+  "old_download_has_no_timeout": true,
+  "pid": 233951
+}

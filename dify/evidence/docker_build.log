@@ -1,0 +1,65 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+time="2026-11-17T13:51:13Z" level=error msg="Can't add file /opt/oceanbase_completion_20261116/dify_allinone_10/acceptance_data02/postgres_socket/.s.PGSQL.5432 to tar: archive/tar: sockets not supported"
+Sending build context to Docker daemon  591.2MB
+Step 1/19 : FROM langgenius/dify-api:1.18.0@sha256:0120970fb4ea59aa328d63b7dda635cccc071efb8aae470cd07115a026dbffd3
+ ---> 0120970fb4ea
+Step 2/19 : USER root
+ ---> Using cache
+ ---> c74f7b22ecf9
+Step 3/19 : RUN apt-get update && apt-get install -y --no-install-recommends postgresql-15=15.20-0+deb12u1 redis-server=5:7.0.15-1~deb12u10 libgomp1 libstdc++6 && (pg_dropcluster --stop 15 main || true) && rm -rf /var/lib/apt/lists/*
+ ---> Using cache
+ ---> 57c3d9623fa9
+Step 4/19 : RUN /usr/local/bin/python -m venv /opt/dream-venv
+ ---> Using cache
+ ---> cc516d118bb7
+Step 5/19 : COPY backend/requirements.txt /tmp/dream-requirements.txt
+ ---> Using cache
+ ---> 5097fd039d73
+Step 6/19 : RUN /opt/dream-venv/bin/pip install --no-cache-dir -r /tmp/dream-requirements.txt
+ ---> Using cache
+ ---> c133ff49cf81
+Step 7/19 : COPY scripts/fetch_dependencies.py /tmp/dream-fetch.py
+ ---> Using cache
+ ---> e0610a2c6de4
+Step 8/19 : RUN /opt/dream-venv/bin/python /tmp/dream-fetch.py --wheel /tmp/powercontext-1.2.0-py3-none-any.whl && /opt/dream-venv/bin/pip install --no-deps /tmp/powercontext-1.2.0-py3-none-any.whl && rm /tmp/powercontext-1.2.0-py3-none-any.whl
+ ---> Using cache
+ ---> 9cb96421d757
+Step 9/19 : COPY backend/fetch_runtime.py /tmp/dream-model-fetch.py
+ ---> Using cache
+ ---> 4f7c1b728af7
+Step 10/19 : COPY .model-cache/ /tmp/dream-model-cache/
+ ---> Using cache
+ ---> db0f5d25fbc5
+Step 11/19 : RUN /opt/dream-venv/bin/python /tmp/dream-model-fetch.py && rm -rf /tmp/dream-model-cache
+ ---> Using cache
+ ---> 4cc2d8f5a6c7
+Step 12/19 : WORKDIR /opt/dream
+ ---> Using cache
+ ---> 1bdf3e5a0bca
+Step 13/19 : COPY backend/ /opt/dream/backend/
+ ---> c75bdbc2ccd2
+Step 14/19 : COPY demo/index.html /opt/dream/demo/index.html
+ ---> 6febfd66b822
+Step 15/19 : COPY app.yml /opt/dream/app.yml
+ ---> fb1674f053b0
+Step 16/19 : ENV PORT=8080 PYTHONDONTWRITEBYTECODE=1 LANG=C.UTF-8 LC_ALL=C.UTF-8
+ ---> Running in 812bc4f51f52
+ ---> Removed intermediate container 812bc4f51f52
+ ---> b3964ff5f939
+Step 17/19 : EXPOSE 8080
+ ---> Running in a5e3c70a7f2b
+ ---> Removed intermediate container a5e3c70a7f2b
+ ---> b61b9a07fcb7
+Step 18/19 : HEALTHCHECK --interval=5s --timeout=3s --start-period=180s --retries=6 CMD /opt/dream-venv/bin/python -c "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:'+os.environ.get('PORT','8080')+'/health',timeout=2)"
+ ---> Running in d30f9704f00c
+ ---> Removed intermediate container d30f9704f00c
+ ---> dc2732284584
+Step 19/19 : ENTRYPOINT ["/opt/dream-venv/bin/python","/opt/dream/backend/supervise.py"]
+ ---> Running in 6796874be2b7
+ ---> Removed intermediate container 6796874be2b7
+ ---> 788b2649fa21
+Successfully built 788b2649fa21
+Successfully tagged dream-dify-complete:20261117

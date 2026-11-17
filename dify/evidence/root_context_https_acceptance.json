@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "scope": "Fresh actualcompleteDifycontainer2CPU2GiB128PID;externalHTTPSsameOrigin2turns;unrelatedOrigin403",
+  "url": "https://status-toolbox-kinase-ray.trycloudflare.com",
+  "cold_ready_sec": 80.22184102400206,
+  "player": "https-1794931233591829960",
+  "turns": [
+    {
+      "turn": 1,
+      "workflow_run_id": "633524fb-9209-4eea-ac88-26a7b5e1909b",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "output": "梦境失物招领局 · 夜班营业\n玩家：https-1794931233591829960｜本次失物：会说话的蓝雨伞 \"umbrella\"\n\n这是你的第一张梦境失物登记单。\n\n柜员说：给会说话的蓝雨伞写信，雨伞会帮你找到失物的线索！\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    },
+    {
+      "turn": 2,
+      "workflow_run_id": "a09da124-47d5-4e44-bf6f-1d8c7ee0a94d",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "output": "梦境失物招领局 · 夜班营业\n玩家：https-1794931233591829960｜本次失物：会说话的蓝雨伞 \"umbrella\"\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞 \"umbrella\"”，做了“给雨伞写信”。\n\n柜员说：A. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    }
+  ],
+  "health": {
+    "status": "ok",
+    "memory_backend": "PowerContext",
+    "generation": "local-model",
+    "workflow": "Dify"
+  },
+  "unrelated_origin_rejected": true,
+  "OOMKilled": false
+}

@@ -1,0 +1,361 @@
+{
+  "kind": "app",
+  "version": "0.7.0",
+  "dependencies": [],
+  "app": {
+    "name": "梦境失物招领局",
+    "description": "Dify Workflow + PowerContext persistent memory + real local Qwen",
+    "mode": "workflow",
+    "icon": "🎩",
+    "icon_type": "emoji",
+    "icon_background": "#EEE8FC",
+    "use_icon_as_answer_icon": false
+  },
+  "workflow": {
+    "conversation_variables": [],
+    "environment_variables": [
+      {
+        "id": "2d179afd-d161-43d8-a2ec-58bb75672126",
+        "name": "POWERCONTEXT_BASE_URL",
+        "value": "http://127.0.0.1:8080",
+        "value_type": "string",
+        "description": "In-container real backend"
+      },
+      {
+        "id": "168b932a-161d-4be6-81c1-f25727a4e734",
+        "name": "POWERCONTEXT_TOKEN",
+        "value": "",
+        "value_type": "secret",
+        "description": "Generated during private initialization"
+      }
+    ],
+    "features": {
+      "file_upload": {
+        "enabled": false
+      },
+      "opening_statement": "",
+      "retriever_resource": {
+        "enabled": false
+      },
+      "sensitive_word_avoidance": {
+        "enabled": false
+      },
+      "speech_to_text": {
+        "enabled": false
+      },
+      "suggested_questions": [],
+      "suggested_questions_after_answer": {
+        "enabled": false
+      },
+      "text_to_speech": {
+        "enabled": false
+      }
+    },
+    "graph": {
+      "nodes": [
+        {
+          "id": "17100001",
+          "type": "custom",
+          "position": {
+            "x": 80,
+            "y": 240
+          },
+          "positionAbsolute": {
+            "x": 80,
+            "y": 240
+          },
+          "width": 242,
+          "height": 100,
+          "sourcePosition": "right",
+          "targetPosition": "left",
+          "data": {
+            "title": "开始：登记梦境失物",
+            "type": "start",
+            "desc": "",
+            "selected": false,
+            "variables": [
+              {
+                "variable": "player_name",
+                "label": "昵称",
+                "type": "text-input",
+                "required": true,
+                "max_length": 32,
+                "options": []
+              },
+              {
+                "variable": "lost_item",
+                "label": "失物",
+                "type": "text-input",
+                "required": true,
+                "max_length": 250,
+                "options": []
+              },
+              {
+                "variable": "action",
+                "label": "行动",
+                "type": "text-input",
+                "required": true,
+                "max_length": 200,
+                "options": []
+              }
+            ]
+          }
+        },
+        {
+          "id": "17100003",
+          "type": "custom",
+          "position": {
+            "x": 680,
+            "y": 240
+          },
+          "positionAbsolute": {
+            "x": 680,
+            "y": 240
+          },
+          "width": 242,
+          "height": 100,
+          "sourcePosition": "right",
+          "targetPosition": "left",
+          "data": {
+            "title": "PowerContext: 读取玩家历史",
+            "type": "http-request",
+            "desc": "",
+            "selected": false,
+            "method": "post",
+            "url": "{{#env.POWERCONTEXT_BASE_URL#}}/workflow/prepare",
+            "headers": "Authorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}",
+            "params": "",
+            "authorization": {
+              "type": "no-auth",
+              "config": null
+            },
+            "body": {
+              "type": "x-www-form-urlencoded",
+              "data": [
+                {
+                  "key": "player_name",
+                  "type": "text",
+                  "value": "{{#17100001.player_name#}}"
+                },
+                {
+                  "key": "lost_item",
+                  "type": "text",
+                  "value": "{{#17100001.lost_item#}}"
+                },
+                {
+                  "key": "action",
+                  "type": "text",
+                  "value": "{{#17100001.action#}}"
+                }
+              ]
+            },
+            "timeout": {
+              "max_connect_timeout": 10,
+              "max_read_timeout": 35,
+              "max_write_timeout": 20
+            },
+            "ssl_verify": true,
+            "variables": [],
+            "retry_config": {
+              "retry_enabled": false,
+              "max_retries": 1,
+              "retry_interval": 500
+            }
+          }
+        },
+        {
+          "id": "17100004",
+          "type": "custom",
+          "position": {
+            "x": 980,
+            "y": 240
+          },
+          "positionAbsolute": {
+            "x": 980,
+            "y": 240
+          },
+          "width": 242,
+          "height": 100,
+          "sourcePosition": "right",
+          "targetPosition": "left",
+          "data": {
+            "title": "Qwen: 根据记忆生成剧情",
+            "type": "http-request",
+            "desc": "",
+            "selected": false,
+            "method": "post",
+            "url": "{{#env.POWERCONTEXT_BASE_URL#}}/workflow/generate",
+            "headers": "Content-Type:application/json\nAuthorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}",
+            "params": "",
+            "authorization": {
+              "type": "no-auth",
+              "config": null
+            },
+            "body": {
+              "type": "json",
+              "data": [
+                {
+                  "type": "text",
+                  "value": "{\"prepared\": {{#17100003.body#}}}"
+                }
+              ]
+            },
+            "timeout": {
+              "max_connect_timeout": 10,
+              "max_read_timeout": 150,
+              "max_write_timeout": 20
+            },
+            "ssl_verify": true,
+            "variables": [],
+            "retry_config": {
+              "retry_enabled": false,
+              "max_retries": 1,
+              "retry_interval": 500
+            }
+          }
+        },
+        {
+          "id": "17100005",
+          "type": "custom",
+          "position": {
+            "x": 1280,
+            "y": 240
+          },
+          "positionAbsolute": {
+            "x": 1280,
+            "y": 240
+          },
+          "width": 242,
+          "height": 100,
+          "sourcePosition": "right",
+          "targetPosition": "left",
+          "data": {
+            "title": "PowerContext: 保存本轮记忆",
+            "type": "http-request",
+            "desc": "",
+            "selected": false,
+            "method": "post",
+            "url": "{{#env.POWERCONTEXT_BASE_URL#}}/workflow/save",
+            "headers": "Content-Type:application/json\nAuthorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}",
+            "params": "",
+            "authorization": {
+              "type": "no-auth",
+              "config": null
+            },
+            "body": {
+              "type": "json",
+              "data": [
+                {
+                  "type": "text",
+                  "value": "{\"generated\": {{#17100004.body#}}}"
+                }
+              ]
+            },
+            "timeout": {
+              "max_connect_timeout": 10,
+              "max_read_timeout": 35,
+              "max_write_timeout": 20
+            },
+            "ssl_verify": true,
+            "variables": [],
+            "retry_config": {
+              "retry_enabled": false,
+              "max_retries": 1,
+              "retry_interval": 500
+            }
+          }
+        },
+        {
+          "id": "17100006",
+          "type": "custom",
+          "position": {
+            "x": 1580,
+            "y": 240
+          },
+          "positionAbsolute": {
+            "x": 1580,
+            "y": 240
+          },
+          "width": 242,
+          "height": 100,
+          "sourcePosition": "right",
+          "targetPosition": "left",
+          "data": {
+            "title": "返回实际剧情和记忆保存确认",
+            "type": "end",
+            "desc": "",
+            "selected": false,
+            "outputs": [
+              {
+                "variable": "result",
+                "value_selector": [
+                  "17100005",
+                  "body"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "17100001-to-17100003",
+          "source": "17100001",
+          "target": "17100003",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "start",
+            "targetType": "http-request",
+            "isInIteration": false,
+            "isInLoop": false
+          }
+        },
+        {
+          "id": "17100003-to-17100004",
+          "source": "17100003",
+          "target": "17100004",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "http-request",
+            "targetType": "http-request",
+            "isInIteration": false,
+            "isInLoop": false
+          }
+        },
+        {
+          "id": "17100004-to-17100005",
+          "source": "17100004",
+          "target": "17100005",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "http-request",
+            "targetType": "http-request",
+            "isInIteration": false,
+            "isInLoop": false
+          }
+        },
+        {
+          "id": "17100005-to-17100006",
+          "source": "17100005",
+          "target": "17100006",
+          "sourceHandle": "source",
+          "targetHandle": "target",
+          "type": "custom",
+          "data": {
+            "sourceType": "http-request",
+            "targetType": "end",
+            "isInIteration": false,
+            "isInLoop": false
+          }
+        }
+      ]
+    },
+    "rag_pipeline_variables": []
+  }
+}

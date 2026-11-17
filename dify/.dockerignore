@@ -1,0 +1,8 @@
+.env
+evidence
+**/__pycache__
+**/*.pyc
+models
+
+.runtime
+.git

@@ -1,0 +1,8 @@
+.runtime/
+.env
+*.token
+__pycache__/
+*.pyc
+
+.model-cache/*
+!.model-cache/.gitkeep

@@ -1,0 +1,756 @@
+app:
+  description: Dify 编排、PowerContext 持久记忆、本地开源模型生成的互动剧情游戏。
+  icon: 🎩
+  icon_background: '#EEE8FC'
+  icon_type: emoji
+  mode: workflow
+  name: 梦境失物招领局
+  use_icon_as_answer_icon: false
+dependencies: []
+kind: app
+site:
+  chat_color_theme: null
+  chat_color_theme_inverted: false
+  copyright: null
+  custom_disclaimer: ''
+  default_language: zh-Hans
+  description: null
+  icon: 🎩
+  icon_background: '#EEE8FC'
+  icon_type: emoji
+  input_placeholder: null
+  privacy_policy: null
+  show_workflow_steps: true
+  title: 梦境失物招领局 · 记忆版
+  use_icon_as_answer_icon: false
+version: 0.7.0
+workflow:
+  conversation_variables: []
+  environment_variables:
+  - description: Dify可访问的PowerContext HTTPS临时/正式域名，末尾不要加斜杠
+    id: d63d2d1b-1949-4b72-9345-8fcb627d97ac
+    name: POWERCONTEXT_BASE_URL
+    selector:
+    - env
+    - POWERCONTEXT_BASE_URL
+    value: http://172.17.0.1:18090
+    value_type: string
+  - description: 必须在Dify编辑器中填入，仅本地PowerContext服务知道的Bearer令牌
+    id: cf40aef0-68df-499d-99b1-75f965b58e48
+    name: POWERCONTEXT_TOKEN
+    selector:
+    - env
+    - POWERCONTEXT_TOKEN
+    value: ''
+    value_type: secret
+  features:
+    file_upload:
+      enabled: false
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: start
+        targetType: code
+      id: 1793349000001-source-1793349000002-target
+      source: '1793349000001'
+      sourceHandle: source
+      target: '1793349000002'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: code
+        targetType: http-request
+      id: 1793349000002-source-1793349000003-target
+      source: '1793349000002'
+      sourceHandle: source
+      target: '1793349000003'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: http-request
+        targetType: code
+      id: 1793349000003-source-1793349000004-target
+      source: '1793349000003'
+      sourceHandle: source
+      target: '1793349000004'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: code
+        targetType: code
+      id: 1793349000004-source-1793349000005-target
+      source: '1793349000004'
+      sourceHandle: source
+      target: '1793349000005'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: code
+        targetType: http-request
+      id: 1793349000005-source-1793349000006-target
+      source: '1793349000005'
+      sourceHandle: source
+      target: '1793349000006'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: http-request
+        targetType: code
+      id: 1793349000006-source-1793349000007-target
+      source: '1793349000006'
+      sourceHandle: source
+      target: '1793349000007'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: code
+        targetType: http-request
+      id: 1793349000007-source-1793349000008-target
+      source: '1793349000007'
+      sourceHandle: source
+      target: '1793349000008'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: http-request
+        targetType: code
+      id: 1793349000008-source-1793349000009-target
+      source: '1793349000008'
+      sourceHandle: source
+      target: '1793349000009'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: code
+        targetType: http-request
+      id: 1793349000009-source-1793349000010-target
+      source: '1793349000009'
+      sourceHandle: source
+      target: '1793349000010'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: http-request
+        targetType: code
+      id: 1793349000010-source-1793349000011-target
+      source: '1793349000010'
+      sourceHandle: source
+      target: '1793349000011'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: code
+        targetType: end
+      id: 1793349000011-source-1793349000012-target
+      source: '1793349000011'
+      sourceHandle: source
+      target: '1793349000012'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: 每次填写相同玩家昵称可以继续前一次的故事。
+        selected: false
+        title: 开始：登记失物
+        type: start
+        variables:
+        - label: 玩家昵称（下次继续请填相同昵称）
+          max_length: 32
+          options: []
+          required: true
+          type: text-input
+          variable: player_name
+        - label: 这次丢失了什么？（越离谱越好）
+          max_length: 250
+          options: []
+          required: true
+          type: paragraph
+          variable: lost_item
+        - label: 你想怎么做？
+          max_length: 200
+          options: []
+          required: true
+          type: paragraph
+          variable: action
+      height: 204
+      id: '1793349000001'
+      position:
+        x: 80
+        y: 280
+      positionAbsolute:
+        x: 80
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        code: "import hashlib, json, re\n\ndef main(player_name: str, lost_item: str,\
+          \ action: str) -> dict:\n    player = re.sub(r'\\s+', ' ', str(player_name)).strip()[:32]\n\
+          \    item = str(lost_item).strip()[:250]\n    move = str(action).strip()[:200]\n\
+          \    if not player or not item or not move:\n        raise ValueError('昵称、失物和行动不能为空')\n\
+          \    # Same nickname => same scope; never use a model-written ID as an authority.\n\
+          \    key = hashlib.sha256(('dream-lostfound-v1:' + player).encode('utf-8')).hexdigest()\n\
+          \    payload = {\n        'title': '梦境失物局 - ' + player,\n        'summary':\
+          \ 'Dify互动小游戏的玩家剧情记忆，请勿存储现实身份或隐私信息',\n        'idempotency_key': 'lostfound-'\
+          \ + key\n    }\n    return {'payload': json.dumps(payload, ensure_ascii=False),\n\
+          \            'player': player, 'item': item, 'move': move}\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          item:
+            children: null
+            type: string
+          move:
+            children: null
+            type: string
+          payload:
+            children: null
+            type: string
+          player:
+            children: null
+            type: string
+        selected: false
+        title: 清洗输入，构造独立玩家Scope
+        type: code
+        variables:
+        - value_selector:
+          - '1793349000001'
+          - player_name
+          variable: player_name
+        - value_selector:
+          - '1793349000001'
+          - lost_item
+          variable: lost_item
+        - value_selector:
+          - '1793349000001'
+          - action
+          variable: action
+      height: 51
+      id: '1793349000002'
+      position:
+        x: 390
+        y: 280
+      positionAbsolute:
+        x: 390
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{{#1793349000002.payload#}}'
+          type: json
+        desc: ''
+        headers: 'Content-Type:application/json
+
+          Authorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 2
+          retry_enabled: false
+          retry_interval: 500
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 15
+          max_read_timeout: 35
+          max_write_timeout: 20
+        title: PowerContext：创建或读取玩家Scope
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/scopes'
+        variables: []
+      height: 110
+      id: '1793349000003'
+      position:
+        x: 700
+        y: 280
+      positionAbsolute:
+        x: 700
+        y: 280
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        code: "import json\n\ndef main(body: str, status_code: int) -> dict:\n   \
+          \ code = int(status_code)\n    if code < 200 or code >= 300:\n        raise\
+          \ ValueError('PowerContext 创建Scope失败，HTTP ' + str(code))\n    reply = json.loads(body)\n\
+          \    sid = reply.get('scope_id')\n    if not isinstance(sid, str) or not\
+          \ sid.strip():\n        raise ValueError('PowerContext没有返回有效scope_id')\n\
+          \    return {'scope_id': sid}\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          scope_id:
+            children: null
+            type: string
+        selected: false
+        title: 校验Scope，提取持久ID
+        type: code
+        variables:
+        - value_selector:
+          - '1793349000003'
+          - body
+          variable: body
+        - value_selector:
+          - '1793349000003'
+          - status_code
+          variable: status_code
+      height: 51
+      id: '1793349000004'
+      position:
+        x: 1010
+        y: 280
+      positionAbsolute:
+        x: 1010
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        code: "import json\n\ndef main(scope_id: str) -> dict:\n    data={'scope_id':scope_id,'query':'lostfoundledger','max_bytes':3800}\n\
+          \    return {'payload':json.dumps(data,ensure_ascii=False)}\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          payload:
+            children: null
+            type: string
+        selected: false
+        title: 准备上下文检索请求
+        type: code
+        variables:
+        - value_selector:
+          - '1793349000004'
+          - scope_id
+          variable: scope_id
+      height: 51
+      id: '1793349000005'
+      position:
+        x: 1320
+        y: 280
+      positionAbsolute:
+        x: 1320
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{{#1793349000005.payload#}}'
+          type: json
+        desc: ''
+        headers: 'Content-Type:application/json
+
+          Authorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 2
+          retry_enabled: false
+          retry_interval: 500
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 15
+          max_read_timeout: 35
+          max_write_timeout: 20
+        title: PowerContext：检索以前的虚构剧情
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/context/prepare'
+        variables: []
+      height: 110
+      id: '1793349000006'
+      position:
+        x: 1630
+        y: 280
+      positionAbsolute:
+        x: 1630
+        y: 280
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        code: "import json\ndef main(body: str, status_code: int, player: str, item:\
+          \ str, move: str) -> dict:\n    if not 200 <= int(status_code) < 300:\n\
+          \        raise ValueError(\"PowerContext recall failed\")\n    obj=json.loads(body)\n\
+          \    memory=obj.get(\"context\",\"\")\n    history=memory.strip()[:3300]\
+          \ if isinstance(memory,str) else \"\"\n    return {\"history\":history or\
+          \ \"首次到访，没有历史记录\", \"had_memory\":\"是\" if history else \"否\",\n       \
+          \     \"story_payload\":json.dumps({\"player\":player,\"item\":item,\"move\"\
+          :move,\"history\":history},ensure_ascii=False)}\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          had_memory:
+            children: null
+            type: string
+          history:
+            children: null
+            type: string
+          story_payload:
+            children: null
+            type: string
+        selected: false
+        title: 解读历史记录和首次到访
+        type: code
+        variables:
+        - value_selector:
+          - '1793349000006'
+          - body
+          variable: body
+        - value_selector:
+          - '1793349000006'
+          - status_code
+          variable: status_code
+        - value_selector:
+          - '1793349000002'
+          - player
+          variable: player
+        - value_selector:
+          - '1793349000002'
+          - item
+          variable: item
+        - value_selector:
+          - '1793349000002'
+          - move
+          variable: move
+      height: 51
+      id: '1793349000007'
+      position:
+        x: 1940
+        y: 280
+      positionAbsolute:
+        x: 1940
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{{#1793349000007.story_payload#}}'
+          type: json
+        desc: ''
+        headers: 'Content-Type:application/json
+
+          Authorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 2
+          retry_enabled: false
+          retry_interval: 500
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 15
+          max_read_timeout: 180
+          max_write_timeout: 30
+        title: 本地开源模型：生成有记忆的剧情
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/story'
+        variables: []
+      height: 131
+      id: '1793349000008'
+      position:
+        x: 2250
+        y: 280
+      positionAbsolute:
+        x: 2250
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        code: "import json\ndef main(scope_id: str, player: str, item: str, move:\
+          \ str, reply: str) -> dict:\n    story=json.loads(reply).get(\"text\",\"\
+          \").strip()\n    if not story:\n        raise ValueError(\"Model returned\
+          \ empty story\")\n    lines=[\"lostfoundledger\",\"玩家: \"+player,\"失物: \"\
+          +item,\"行动: \"+move,\"夜班柜员: \"+story]\n    log=chr(10).join(lines)\n   \
+          \ payload={\"scope_id\":scope_id,\"kind\":\"decision\",\"text\":log,\"reason\"\
+          :\"虚构剧情，供后续互动复用\"}\n    return {\"story\":story,\"payload\":json.dumps(payload,ensure_ascii=False)}\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          payload:
+            children: null
+            type: string
+          story:
+            children: null
+            type: string
+        selected: false
+        title: 构造记忆写入请求
+        type: code
+        variables:
+        - value_selector:
+          - '1793349000004'
+          - scope_id
+          variable: scope_id
+        - value_selector:
+          - '1793349000002'
+          - player
+          variable: player
+        - value_selector:
+          - '1793349000002'
+          - item
+          variable: item
+        - value_selector:
+          - '1793349000002'
+          - move
+          variable: move
+        - value_selector:
+          - '1793349000008'
+          - body
+          variable: reply
+      height: 51
+      id: '1793349000009'
+      position:
+        x: 2560
+        y: 280
+      positionAbsolute:
+        x: 2560
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        authorization:
+          config: null
+          type: no-auth
+        body:
+          data:
+          - type: text
+            value: '{{#1793349000009.payload#}}'
+          type: json
+        desc: ''
+        headers: 'Content-Type:application/json
+
+          Authorization:Bearer {{#env.POWERCONTEXT_TOKEN#}}'
+        method: post
+        params: ''
+        retry_config:
+          max_retries: 2
+          retry_enabled: false
+          retry_interval: 500
+        selected: false
+        ssl_verify: true
+        timeout:
+          max_connect_timeout: 15
+          max_read_timeout: 35
+          max_write_timeout: 20
+        title: PowerContext：写入本轮剧情
+        type: http-request
+        url: '{{#env.POWERCONTEXT_BASE_URL#}}/v1/memory/remember'
+        variables: []
+      height: 110
+      id: '1793349000010'
+      position:
+        x: 2870
+        y: 280
+      positionAbsolute:
+        x: 2870
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        code: "import json\ndef main(story: str, body: str, status_code: int, had_memory:\
+          \ str) -> dict:\n    if not 200 <= int(status_code) < 300:\n        raise\
+          \ ValueError(\"PowerContext write failed\")\n    saved=json.loads(body).get(\"\
+          saved\") is True\n    if not saved:\n        raise ValueError(\"Memory write\
+          \ was not confirmed\")\n    return {\"result\":story.strip()+chr(10)+chr(10)+\"\
+          本次剧情已保存，下次填写同一昵称可以继续。\",\n            \"memory_saved\":\"是\",\"previous_memory_loaded\"\
+          :had_memory}\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          memory_saved:
+            children: null
+            type: string
+          previous_memory_loaded:
+            children: null
+            type: string
+          result:
+            children: null
+            type: string
+        selected: false
+        title: 核实保存结果、输出剧情
+        type: code
+        variables:
+        - value_selector:
+          - '1793349000009'
+          - story
+          variable: story
+        - value_selector:
+          - '1793349000010'
+          - body
+          variable: body
+        - value_selector:
+          - '1793349000010'
+          - status_code
+          variable: status_code
+        - value_selector:
+          - '1793349000007'
+          - had_memory
+          variable: had_memory
+      height: 51
+      id: '1793349000011'
+      position:
+        x: 3180
+        y: 280
+      positionAbsolute:
+        x: 3180
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1793349000011'
+          - result
+          variable: result
+        - value_selector:
+          - '1793349000011'
+          - memory_saved
+          variable: memory_saved
+        - value_selector:
+          - '1793349000011'
+          - previous_memory_loaded
+          variable: previous_memory_loaded
+        selected: false
+        title: 结束：返回互动剧情和记忆校验
+        type: end
+      height: 141
+      id: '1793349000012'
+      position:
+        x: 3490
+        y: 280
+      positionAbsolute:
+        x: 3490
+        y: 280
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+  rag_pipeline_variables: []

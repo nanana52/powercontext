@@ -1,0 +1,1 @@
+{"status": "PASS", "default_entrypoint": true, "external_token_supplied": false, "network": "none", "real_model_generation": true, "memory_write_read": true, "health": {"status": "ok", "memory_backend": "PowerContext", "generation": "local-model"}, "reply_characters": 167}

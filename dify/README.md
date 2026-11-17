@@ -11,7 +11,7 @@ Dify Workflow 负责输入清洗、创建玩家分区、读取历史、调用模
 - backend/requirements.txt：固定 Python 依赖。
 - third_party/powercontext-1.2.0-py3-none-any.whl：未修改的官方 PowerContext 发布包，版本、来源、许可证及 SHA256 见 THIRD_PARTY.md。
 - scripts/verify_full_stack.py：安装、导入发布及两轮真实工作流自动验收。
-- Dockerfile：配套后端的源码构建入口；不包含 Dify 本体和模型。
+- Dockerfile: 默认 standalone local model + PowerContext backend; see CONTAINER.md.
 - VALIDATION.md、evidence/compact_*.json：验证步骤和真实运行记录。
 
 ## 运行环境
@@ -63,3 +63,6 @@ DREAM_PYTHON=/path/to/python3.12 bash run.sh
 模型规模较小，回复的语言质量和变化有限。昵称是虚构游戏记忆的分区标识，不是身份认证。只输入虚构故事，不保存现实隐私。
 
 停止配套模型和后端可运行 bash stop_backend.sh；保留 .runtime 才能保留管理员配置和记忆。Dify 容器使用本目录运行配置管理。
+
+
+Default Docker entrypoint and real Dify two-turn integration both pass; see CONTAINER.md and evidence/standalone_*. The optional demo/ UI forwards a real published Dify workflow.

@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "app_id": "8b4f127a-c13b-40a3-a7c1-41e9e2914dce",
+  "player": "verified-1794904177940483141",
+  "turns": [
+    {
+      "turn": 1,
+      "status": "succeeded",
+      "memory_saved": true,
+      "loaded_previous": false
+    },
+    {
+      "turn": 2,
+      "status": "succeeded",
+      "memory_saved": true,
+      "loaded_previous": true
+    }
+  ],
+  "memory_count": 2,
+  "memory_ref": {
+    "family": "memory",
+    "artifact_id": "memory",
+    "revision": 2
+  },
+  "scope_id": "dream-0c22592c1d87e2dc51d573dc6a28c3a742233a63758ed38eb2756d6062b535c2",
+  "backend_url": "http://172.17.0.1:18114",
+  "source": "real Dify workflow API, real local model and PowerContext"
+}

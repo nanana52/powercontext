@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "scope": "FreshactualDify1.18.0fixedimagebasewithonlytwoSDKoverlaypackagesandPowerContextwheel;2CPU2GiB128PID;actualQwenandPowerContext2turns",
+  "build_assets": "verifiedcacheexplicit",
+  "turns": [
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：thin-1794945017813804492｜本次失物：talking blue umbrella \"umbrella\"\n\n这是你的第一张梦境失物登记单。\n\n柜员说：对不起，我无法提供这样的服务。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "workflow_run_id": "8409ab88-147a-4b26-96cc-518f2a22e576"
+    },
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：thin-1794945017813804492｜本次失物：talking blue umbrella \"umbrella\"\n\n柜员翻出了你的旧登记：上次你带来“talking blue umbrella \"umbrella\"”，做了“Write an apology letter to the umbrella”。\n\n柜员说：玩家：请问你有什么好的办法可以带回家这个伞呢？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "workflow_run_id": "af310f50-6efd-4c82-a00c-3bbb37bc256c"
+    }
+  ],
+  "OOMKilled": false,
+  "actual_memory_limit": 2147483648
+}

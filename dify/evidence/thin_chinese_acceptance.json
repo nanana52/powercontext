@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "scope": "ActualthinruntimecontainerrestartthenChinese2workflowturns;previousEnglishacceptancerecordretained",
+  "turns": [
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：zh-1794945209430185497｜本次失物：会说话的蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：我来帮您，雨伞可真能说话，您要是有失物，可以直接给它写封信，它会帮您找回来。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "workflow_run_id": "c032ce01-d0af-407c-a80d-4e44e887468b"
+    },
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：zh-1794945209430185497｜本次失物：会说话的蓝雨伞\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞”，做了“给雨伞写一封道歉信”。\n\n柜员说：玩家：A. 问问失物为什么会出现在梦里。\n玩家：B. 提出一个更离谱的办法把它带回家。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "workflow_run_id": "16b28686-2f57-4fe4-a966-c9e27baeadfe"
+    }
+  ],
+  "limitations": "Qwen0.5B may produce lowquality or refuse harmlessinput; runtimeandmemorytestsare notcreativequalityscores"
+}

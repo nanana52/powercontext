@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "seconds": 46.01314679699135,
+  "model_assets": "prior_cleanbuildchecksumverifiedcache",
+  "python_overlay": [
+    "aiosqlite0.22.1",
+    "sqlite-vec0.1.9",
+    "rfc87850.1.4",
+    "PowerContext1.2.0"
+  ]
+}

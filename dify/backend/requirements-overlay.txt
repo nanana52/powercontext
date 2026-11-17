@@ -1,0 +1,4 @@
+aiosqlite==0.22.1
+sqlite-vec==0.1.9
+rfc8785==0.1.4
+python-multipart==0.0.32

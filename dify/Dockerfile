@@ -2,7 +2,8 @@ FROM python:3.12.12-slim-bookworm@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134
 WORKDIR /app
 COPY backend/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
-COPY third_party/powercontext-1.2.0-py3-none-any.whl /tmp/powercontext-1.2.0-py3-none-any.whl
+COPY scripts/fetch_dependencies.py /tmp/fetch_dependencies.py
+RUN python /tmp/fetch_dependencies.py --wheel /tmp/powercontext-1.2.0-py3-none-any.whl
 RUN pip install --no-deps /tmp/powercontext-1.2.0-py3-none-any.whl
 COPY backend/app.py /app/app.py
 ENV PYTHONDONTWRITEBYTECODE=1

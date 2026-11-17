@@ -30,7 +30,8 @@ if [ ! -x "$RUNTIME/venv/bin/python" ]; then
   "$PYTHON" -m venv "$RUNTIME/venv"
 fi
 "$RUNTIME/venv/bin/python" -m pip install --disable-pip-version-check -r backend/requirements.txt
-"$RUNTIME/venv/bin/python" -m pip install --no-deps "$ROOT/third_party/powercontext-1.2.0-py3-none-any.whl"
+"$RUNTIME/venv/bin/python" "$ROOT/scripts/fetch_dependencies.py" --wheel "$RUNTIME/powercontext-1.2.0-py3-none-any.whl"
+"$RUNTIME/venv/bin/python" -m pip install --no-deps "$RUNTIME/powercontext-1.2.0-py3-none-any.whl"
 if [ ! -f "$RUNTIME/access.token" ]; then
   "$RUNTIME/venv/bin/python" -c 'import secrets,sys,pathlib; p=pathlib.Path(sys.argv[1]);p.write_text(secrets.token_urlsafe(32));p.chmod(0o600)' "$RUNTIME/access.token"
 fi

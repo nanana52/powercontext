@@ -9,7 +9,8 @@ import shutil
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "deployment/upstream_docker"
+from fetch_dependencies import dify
+SOURCE = dify()
 RUNTIME = ROOT / ".runtime/dify"
 DEPLOYMENT = RUNTIME / "deployment"
 PROJECT = os.environ.get("DREAM_DIFY_PROJECT", "dream-lostfound")

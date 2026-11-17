@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "app_id": "919774fa-c948-42f3-89fc-8061b04af3fe",
+  "player": "verified-1794912500090712054",
+  "turns": [
+    {
+      "turn": 1,
+      "status": "succeeded",
+      "memory_saved": true,
+      "loaded_previous": false
+    },
+    {
+      "turn": 2,
+      "status": "succeeded",
+      "memory_saved": true,
+      "loaded_previous": true
+    }
+  ],
+  "memory_count": 2,
+  "memory_ref": {
+    "family": "memory",
+    "artifact_id": "memory",
+    "revision": 2
+  },
+  "scope_id": "dream-6a73653b5a6cc88dd848e411a3cd7bc967537169e734f26e36ec65b999468da0",
+  "backend_url": "http://172.17.0.1:18104",
+  "source": "real Dify workflow API, real local model and PowerContext"
+}
+DIFY_FULL_STACK_ACCEPTANCE_PASS
+Private administrator credentials: /opt/oceanbase_completion_20261116/dify_text_07/.runtime/owner.json
+Workflow evidence: /opt/oceanbase_completion_20261116/dify_text_07/.runtime/validation

@@ -1,0 +1,100 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  515.3MB
+Step 1/18 : FROM python:3.12.12-slim-bookworm@sha256:593bd06efe90efa80dc4eee3948be7c0fde4134606dd40d8dd8dbcade98e669c
+ ---> 593bd06efe90
+Step 2/18 : WORKDIR /app
+ ---> Using cache
+ ---> 1ed5776a5c1e
+Step 3/18 : COPY backend/requirements.txt /tmp/requirements.txt
+ ---> Using cache
+ ---> c042a936c86d
+Step 4/18 : RUN pip install --no-cache-dir -r /tmp/requirements.txt
+ ---> Using cache
+ ---> 27a361e868cd
+Step 5/18 : COPY scripts/fetch_dependencies.py /tmp/fetch_dependencies.py
+ ---> b72f42027482
+Step 6/18 : RUN python /tmp/fetch_dependencies.py --wheel /tmp/powercontext-1.2.0-py3-none-any.whl
+ ---> Running in df3dd8a01ae5
+/tmp/powercontext-1.2.0-py3-none-any.whl
+ ---> Removed intermediate container df3dd8a01ae5
+ ---> 9665e45f5674
+Step 7/18 : RUN pip install --no-deps /tmp/powercontext-1.2.0-py3-none-any.whl
+ ---> Running in 4532bb85e560
+Processing /tmp/powercontext-1.2.0-py3-none-any.whl
+Installing collected packages: powercontext
+Successfully installed powercontext-1.2.0
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+[0m[91m
+[notice] A new release of pip is available: 25.0.1 -> 26.3
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 4532bb85e560
+ ---> 6dabc3f5b570
+Step 8/18 : COPY backend/app.py /app/app.py
+ ---> eeeba3ba4064
+Step 9/18 : ENV PYTHONDONTWRITEBYTECODE=1
+ ---> Running in 8353ec9d2b04
+ ---> Removed intermediate container 8353ec9d2b04
+ ---> 121ad9a56f96
+Step 10/18 : RUN useradd --uid 10001 --create-home dream && mkdir /data && chown dream:dream /data
+ ---> Running in 2dbf69e31d1d
+ ---> Removed intermediate container 2dbf69e31d1d
+ ---> 0b3d19cff0e2
+Step 11/18 : RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 libgomp1 && rm -rf /var/lib/apt/lists/*
+ ---> Running in 26f5c72bee8e
+Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [34.8 kB]
+Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [375 kB]
+Fetched 9414 kB in 21s (456 kB/s)
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+libstdc++6 is already the newest version (12.2.0-14+deb12u1).
+libstdc++6 set to manually installed.
+The following NEW packages will be installed:
+  libgomp1
+0 upgraded, 1 newly installed, 0 to remove and 24 not upgraded.
+Need to get 116 kB of archives.
+After this operation, 319 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bookworm/main amd64 libgomp1 amd64 12.2.0-14+deb12u1 [116 kB]
+[91mdebconf: delaying package configuration, since apt-utils is not installed
+[0mFetched 116 kB in 0s (261 kB/s)
+Selecting previously unselected package libgomp1:amd64.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 6695 files and directories currently installed.)
+Preparing to unpack .../libgomp1_12.2.0-14+deb12u1_amd64.deb ...
+Unpacking libgomp1:amd64 (12.2.0-14+deb12u1) ...
+Setting up libgomp1:amd64 (12.2.0-14+deb12u1) ...
+Processing triggers for libc-bin (2.36-9+deb12u13) ...
+ ---> Removed intermediate container 26f5c72bee8e
+ ---> fb174b4946a2
+Step 12/18 : COPY backend/fetch_runtime.py /tmp/fetch_runtime.py
+ ---> f5919e8249b6
+Step 13/18 : COPY .model-cache/ /tmp/dream-model-cache/
+ ---> 8ab6ec86c9ad
+Step 14/18 : RUN python /tmp/fetch_runtime.py && rm -rf /tmp/dream-model-cache
+ ---> Running in db1b1f5b5fa7
+MODEL_AND_RUNTIME_CHECKSUMS_PASS
+ ---> Removed intermediate container db1b1f5b5fa7
+ ---> 15ad0be9527d
+Step 15/18 : COPY backend/container_main.py /app/container_main.py
+ ---> 66054ee72c67
+Step 16/18 : USER dream
+ ---> Running in 56289306c93c
+ ---> Removed intermediate container 56289306c93c
+ ---> a137a8f8d5e6
+Step 17/18 : EXPOSE 18090
+ ---> Running in 068e3327ccfb
+ ---> Removed intermediate container 068e3327ccfb
+ ---> ef464896adb7
+Step 18/18 : ENTRYPOINT ["python","/app/container_main.py"]
+ ---> Running in 53c7e59a8ec3
+ ---> Removed intermediate container 53c7e59a8ec3
+ ---> c5fd8f533950
+Successfully built c5fd8f533950
+Successfully tagged dream-lostfound-text:20261117

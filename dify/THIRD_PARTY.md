@@ -1,1 +1,3 @@
 PowerContext 1.2.0 is an unmodified official Apache-2.0 dependency distributed as its original PyPI wheel. Source: https://github.com/oceanbase/powercontext/tree/powercontext-v1.2.0 . Wheel SHA256: 9bb55ec13bb2fc1ac84038d917042cc2890ffab4aeedacf1cd5ba5329dcb84b9 . Its license and notices are included inside the wheel. No third-party source is claimed as original game code.
+
+Source-only delivery: official PowerContext wheel is fetched by scripts/fetch_dependencies.py into private runtime and SHA256-verified. Dify upstream Docker configuration is included as text and verified against deployment/upstream_manifest.json. No wheel/model binary is committed. Full game source, DSL, deployment scripts, dependency locks and real workflow evidence are included.

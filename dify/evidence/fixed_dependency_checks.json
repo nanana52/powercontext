@@ -1,0 +1,7 @@
+{
+  "powercontext_wheel_download": "PASS",
+  "powercontext_sha256": "9bb55ec13bb2fc1ac84038d917042cc2890ffab4aeedacf1cd5ba5329dcb84b9",
+  "upstream_config_hash_validation": "PASS",
+  "runtime_fetch_root": "private .runtime",
+  "network_note": "Do not require fetching84 GitHub raw files at startup; delivered verified text config is used."
+}

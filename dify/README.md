@@ -9,7 +9,7 @@ Dify Workflow 负责输入清洗、创建玩家分区、读取历史、调用模
 - app.yml：可直接导入 Dify 的应用 DSL，与 dsl/dream-lostfound.yml 完全相同。
 - backend/app.py：本作品的配套服务源码。
 - backend/requirements.txt：固定 Python 依赖。
-- third_party/powercontext-1.2.0-py3-none-any.whl：未修改的官方 PowerContext 发布包，版本、来源、许可证及 SHA256 见 THIRD_PARTY.md。
+- scripts/fetch_dependencies.py：未修改的官方 PowerContext 发布包，版本、来源、许可证及 SHA256 见 THIRD_PARTY.md。
 - scripts/verify_full_stack.py：安装、导入发布及两轮真实工作流自动验收。
 - Dockerfile: 默认 standalone local model + PowerContext backend; see CONTAINER.md.
 - VALIDATION.md、evidence/compact_*.json：验证步骤和真实运行记录。
@@ -66,3 +66,6 @@ DREAM_PYTHON=/path/to/python3.12 bash run.sh
 
 
 Default Docker entrypoint and real Dify two-turn integration both pass; see CONTAINER.md and evidence/standalone_*. The optional demo/ UI forwards a real published Dify workflow.
+
+
+Source-only delivery: official PowerContext wheel is fetched by scripts/fetch_dependencies.py into private runtime and SHA256-verified. Dify upstream Docker configuration is included as text and verified against deployment/upstream_manifest.json. No wheel/model binary is committed. Full game source, DSL, deployment scripts, dependency locks and real workflow evidence are included.

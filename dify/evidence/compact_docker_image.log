@@ -1,0 +1,1 @@
+{"status": "PASS", "health": {"status": "ok", "memory_backend": "PowerContext", "generation": "local-model"}, "uid": 10001, "memory_write_and_read": true, "network": "none", "default_entrypoint": true}

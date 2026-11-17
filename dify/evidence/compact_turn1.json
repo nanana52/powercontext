@@ -1,0 +1,20 @@
+{
+  "task_id": "2bf423c8-5020-4b1b-9945-b75fa648bbf0",
+  "workflow_run_id": "d9c17ca4-8bf6-4bff-a16a-48a97384306e",
+  "data": {
+    "id": "d9c17ca4-8bf6-4bff-a16a-48a97384306e",
+    "workflow_id": "8fb3d56f-a83c-4b2e-aff8-3511e7f6e7e0",
+    "status": "succeeded",
+    "outputs": {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：verified-1794900224857425747｜本次失物：会说话的蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：哈哈，给雨伞写封道歉信，看看它能带你去哪里？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。\n\n本次剧情已保存，下次填写同一昵称可以继续。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否"
+    },
+    "error": null,
+    "elapsed_time": 1.7334884140000213,
+    "total_tokens": 0,
+    "total_steps": 12,
+    "created_at": 1794900225,
+    "finished_at": 1794900226
+  }
+}

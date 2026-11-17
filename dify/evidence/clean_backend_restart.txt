@@ -1,0 +1,5 @@
+CLEAN_DEPLOYMENT_MODEL_AND_BACKEND_RESTART_PASS
+{"memory_count": 2, "memory_ref": {"family": "memory", "artifact_id": "memory", "revision": 2}}
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+Using Python 3.12.12 environment at: .runtime/venv
+Audited 81 packages in 40ms

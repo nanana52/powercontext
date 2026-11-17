@@ -1,0 +1,14 @@
+{
+  "dify_version": "1.18.0",
+  "dsl_version": "0.7.0",
+  "clean_dify_project": "dream-clean-02",
+  "configuration": "generated from delivered scripts without preexisting env or data",
+  "python": "3.12.12 preinstalled via DREAM_PYTHON",
+  "public_install_cache": "SHA256-verified Qwen model and llama.cpp binary reused; no database, token or user state reused",
+  "compose_services": "ALL_HEALTHY_OR_COMPLETED",
+  "dsl_import": "completed without warnings",
+  "first_turn": "succeeded; previous_memory_loaded=no; memory_saved=yes",
+  "second_turn": "succeeded; previous_memory_loaded=yes; memory_saved=yes",
+  "backend_and_model_restart": "PASS; two Memory records retained",
+  "official_platform_score": "pending; local acceptance does not establish platform score"
+}

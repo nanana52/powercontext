@@ -1,0 +1,61 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_wrapper_exposes_profile_without_reinterpreting_provider_metadata _____
+
+    def test_wrapper_exposes_profile_without_reinterpreting_provider_metadata():
+        async def run():
+            class Provider:
+                profile = object()
+                def __init__(self): self.calls = []
+                async def embed(self, texts):
+                    self.calls.append(tuple(texts))
+                    return EmbeddingResult(vectors=tuple((float(len(t)),) for t in texts),
+                                           usage=InferenceUsage(requests=1, input_tokens=9))
+            base = Provider()
+            wrapped = CoalescingEmbeddingModel(base, coalesce_ms=0)
+            assert wrapped.profile is base.profile
+            result = await wrapped.embed(('alpha', 'beta', 'alpha'))
+            assert result.vectors == ((5.0,), (4.0,), (5.0,))
+            assert result.usage.requests == 1 and result.usage.input_tokens == 9
+            cached = await wrapped.embed(('alpha',))
+            assert cached.vectors == ((5.0,),) and cached.usage.requests == 0
+            assert base.calls == [('alpha', 'beta')]
+>       asyncio.run(run())
+
+completion_20261116/qa/test_embedding_profile_passthrough.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/oceanbase_completion_20261116/python/cpython-3.12.12-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:195: in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+/opt/oceanbase_completion_20261116/python/cpython-3.12.12-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py:118: in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/oceanbase_completion_20261116/python/cpython-3.12.12-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py:691: in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+completion_20261116/qa/test_embedding_profile_passthrough.py:19: in run
+    result = await wrapped.embed(('alpha', 'beta', 'alpha'))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/oceanbase_completion_20261116/product/src/powercontext/builtin/inference/coalescing.py:51: in embed
+    return await self._get(tuple(texts), "document")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/oceanbase_completion_20261116/product/src/powercontext/builtin/inference/coalescing.py:88: in _get
+    completed = await asyncio.gather(*(asyncio.shield(fut) for fut in pending))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/oceanbase_completion_20261116/product/src/powercontext/builtin/inference/coalescing.py:197: in _run_batch
+    if any(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <tuple_iterator object at 0x740bb21c7340>
+
+    if any(
+>       len(vector) != self.profile.dimension or not all(math.isfinite(x) for x in vector)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+        for vector in vectors
+    ):
+E   AttributeError: 'object' object has no attribute 'dimension'
+
+/opt/oceanbase_completion_20261116/product/src/powercontext/builtin/inference/coalescing.py:198: AttributeError
+=========================== short test summary info ============================
+FAILED ../../../../dev::test_wrapper_exposes_profile_without_reinterpreting_provider_metadata
+1 failed in 1.28s

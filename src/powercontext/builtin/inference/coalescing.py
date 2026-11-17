@@ -195,7 +195,7 @@ class CoalescingEmbeddingModel:
             )
             vectors = tuple(tuple(float(x) for x in vector) for vector in answer.vectors)
             if any(
-                len(vector) != self.profile.dimension or not all(math.isfinite(x) for x in vector)
+                not all(math.isfinite(x) for x in vector)
                 for vector in vectors
             ):
                 raise ValueError("Embedding provider returned invalid vectors")

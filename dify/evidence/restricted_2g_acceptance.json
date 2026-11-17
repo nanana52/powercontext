@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "scope": "Actual complete default container2CPU2GiB/noSwap128PID/networknone;freshdata",
+  "network": "none",
+  "startup_sec": 81.87974633499107,
+  "app_id": "c7af5961-c685-4f63-811c-665bced3b34f",
+  "turns": [
+    {
+      "turn": 1,
+      "workflow_run_id": "02481821-8f44-4e96-9cf9-ce65f0cbb0e8",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "output": "梦境失物招领局 · 夜班营业\n玩家：single-1794926179640824691｜本次失物：会说话的蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：“给雨伞写信，看看它会说些什么？不过这可能不是个好主意，雨伞有它自己的脾气，写信可能反而会让人失望。”\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    },
+    {
+      "turn": 2,
+      "workflow_run_id": "09f34ff2-2337-4c29-b297-b29dc5c17ae6",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "output": "梦境失物招领局 · 夜班营业\n玩家：single-1794926179640824691｜本次失物：会说话的蓝雨伞\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞”，做了“给雨伞写一封道歉信”。\n\n柜员说：玩家选择：A. 问问失物为什么会出现在梦里。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    }
+  ],
+  "player": "single-1794926179640824691",
+  "container_memory_peak_bytes": 2147483648,
+  "container_memory_limit_bytes": 2147483648,
+  "OOMKilled": false
+}

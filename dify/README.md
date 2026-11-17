@@ -17,7 +17,7 @@ bash run.sh
 ```bash
 docker build -t dream-dify-complete:local .
 docker volume create dream-dify-data
-docker run --name dream-dify-game --cpus=2 --memory=3g --pids-limit=256 -p 127.0.0.1:8080:8080 -v dream-dify-data:/data dream-dify-complete:local
+docker run --name dream-dify-game --cpus=2 --memory=2g --memory-swap=2g --pids-limit=128 -p 127.0.0.1:8080:8080 -v dream-dify-data:/data dream-dify-complete:local
 ```
 
 默认容器前台监督真实 Dify API及worker、PostgreSQL15、Redis7、PowerContext与Qwen；不需要宿主机再启动其它服务或在容器内调用Docker。网页 /api/play 会调用实际发布的Dify Workflow API。/health 初始化中为503，所有服务和DSL发布完成为200。Dify管理接口只在容器内127.0.0.1监听，不对外开放。
@@ -33,3 +33,9 @@ docker run --name dream-dify-game --cpus=2 --memory=3g --pids-limit=256 -p 127.0
 app.yml 是唯一完整Dify DSL。backend/app.py 提供玩家入口与真实SDK适配，backend/supervise.py 负责前台监督和私有配置，backend/bootstrap_dify.py 通过官方Dify服务导入并发布DSL。scripts/fetch_dependencies.py 与 backend/fetch_runtime.py 固定资源下载并校验SHA256；backend/requirements.txt 锁定依赖，独立虚拟环境不污染Dify。Dockerfile固定官方镜像摘要及PostgreSQL/Redis版本。evidence/ 提供实际默认容器验收与两轮工作流记录。
 
 模型规模较小，剧情语言质量有限。昵称是虚构记忆分区，不是身份认证，只输入虚构信息。验收证据不等同赛事正式分数，正式结果以对应提交任务为准。
+
+
+HTTPS reverse proxy: loopback and the default Docker host gateway are trusted for forwarded protocol headers. A custom network may set DREAM_TRUSTED_PROXY_IPS to its actual proxy IPs. This preserves same-origin validation for HTTPS; unrelated Origin headers are still rejected.
+
+
+Direct temporary HTTPS game: https://status-toolbox-kinase-ray.trycloudflare.com . No login/key required; play twice with same nickname to verify actual Dify+PowerContext history. See PREVIEW.md and evidence/https_preview_acceptance.json. This current snapshot is verified with2CPU2GiB128PID and fixes trusted HTTPS proxy protocol recognition; local acceptance does not establish the cause of previous platformfail100.

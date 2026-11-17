@@ -4,25 +4,32 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 RUNTIME="${DREAM_RUNTIME_DIR:-$ROOT/.runtime}"
 mkdir -p "$RUNTIME/models" "$RUNTIME/logs" "$RUNTIME/data"
-if ! command -v uv >/dev/null 2>&1; then
-  python3 -m pip install --user 'uv==0.9.9'
-  export PATH="$HOME/.local/bin:$PATH"
-fi
 PYTHON="${DREAM_PYTHON:-}"
 if [ -z "$PYTHON" ] && command -v python3.12 >/dev/null 2>&1; then
   PYTHON="$(command -v python3.12)"
 fi
+if [ -z "$PYTHON" ] && python3 -c 'import sys;raise SystemExit(sys.version_info[:2] != (3,12))' 2>/dev/null; then
+  PYTHON="$(command -v python3)"
+fi
 if [ -z "$PYTHON" ]; then
-  uv python install 3.12.12
-  PYTHON="$(uv python find 3.12.12)"
+  if command -v uv >/dev/null 2>&1; then
+    UV="$(command -v uv)"
+  else
+    # Bootstrap tooling inside this deployment, including on PEP 668 systems.
+    python3 -m venv "$RUNTIME/bootstrap"
+    "$RUNTIME/bootstrap/bin/python" -m pip install 'uv==0.9.9'
+    UV="$RUNTIME/bootstrap/bin/uv"
+  fi
+  "$UV" python install 3.12.12
+  PYTHON="$("$UV" python find 3.12.12)"
 fi
 "$PYTHON" -c 'import sys;raise SystemExit(sys.version_info[:2] != (3,12))'
 MODEL_PORT="${DREAM_MODEL_PORT:-18081}"
 BACKEND_PORT="${DREAM_BACKEND_PORT:-18090}"
 if [ ! -x "$RUNTIME/venv/bin/python" ]; then
-  uv venv --python "$PYTHON" "$RUNTIME/venv"
+  "$PYTHON" -m venv "$RUNTIME/venv"
 fi
-uv pip install --python "$RUNTIME/venv/bin/python" -r backend/requirements.txt
+"$RUNTIME/venv/bin/python" -m pip install --disable-pip-version-check -r backend/requirements.txt
 if [ ! -f "$RUNTIME/access.token" ]; then
   "$RUNTIME/venv/bin/python" -c 'import secrets,sys,pathlib; p=pathlib.Path(sys.argv[1]);p.write_text(secrets.token_urlsafe(32));p.chmod(0o600)' "$RUNTIME/access.token"
 fi

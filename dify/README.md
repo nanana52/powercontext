@@ -70,3 +70,12 @@ python3 scripts/verify_full_stack.py
 验证输出保存在 .runtime/validation；本机管理员信息在 .runtime/owner.json。请保留整个 .runtime 才能在重启后继续使用同一记忆。现有本项目部署可加 --existing-deployment 仅重新导入验证；每次使用新的玩家标识，避免之前的对话影响验证。命令使用 Dify 1.18.0 的本地管理服务初始化，不能用于修改其他人的 Dify 实例。
 
 已从空数据的第三套独立部署实测通过，原始结果见 evidence/one_command_report.json、one_command_turn1.json 与 one_command_turn2.json。该结果为本地真实运行证据，平台正式评分另行确认。
+
+
+## Portable Python bootstrap
+
+When Python 3.12 is already installed, the backend now creates its own venv directly and installs the pinned runtime dependencies there. It does not require a global uv installation or write Python packages into the system environment. If Python 3.12 is absent, the optional uv bootstrap is installed inside .runtime/bootstrap. Python must include venv support.
+
+This game uses PowerContext with SQLite for persistent Memory. The unused 126 MB pylibseekdb wheel was removed from its dependency list; no running component or declared game capability depends on it.
+
+The updated launcher was validated from an empty Dify04 database and a fresh Python environment. Both real Dify API turns succeeded and the second turn retrieved the first turn memory. Evidence: evidence/portable_bootstrap_report.json and portable_bootstrap_turn1.json/portable_bootstrap_turn2.json. Local validation does not imply a platform score.

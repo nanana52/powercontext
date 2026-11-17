@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "cases": [
+    "Interrupted response resumes from received bytes",
+    "Server ignoring Range restarts without appending corrupt bytes",
+    "Wrong SHA256 never publishes target",
+    "Verified cache avoids download"
+  ],
+  "requests": [
+    {
+      "path": "/resume",
+      "offset": 0
+    },
+    {
+      "path": "/resume",
+      "offset": 65536
+    },
+    {
+      "path": "/ignore",
+      "offset": 100
+    },
+    {
+      "path": "/invalid",
+      "offset": 0
+    },
+    {
+      "path": "/invalid",
+      "offset": 0
+    },
+    {
+      "path": "/invalid",
+      "offset": 0
+    },
+    {
+      "path": "/invalid",
+      "offset": 0
+    },
+    {
+      "path": "/invalid",
+      "offset": 0
+    }
+  ],
+  "scope": "actualHTTPfailureinjection, not mocked downloader"
+}

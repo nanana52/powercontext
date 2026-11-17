@@ -39,3 +39,19 @@ HTTPS reverse proxy: loopback and the default Docker host gateway are trusted fo
 
 
 Direct temporary HTTPS game: https://status-toolbox-kinase-ray.trycloudflare.com . No login/key required; play twice with same nickname to verify actual Dify+PowerContext history. See PREVIEW.md and evidence/https_preview_acceptance.json. This current snapshot is verified with2CPU2GiB128PID and fixes trusted HTTPS proxy protocol recognition; local acceptance does not establish the cause of previous platformfail100.
+
+
+## Standard Docker Compose entrypoint
+
+From either the repository root or `dify/`, run:
+
+```bash
+docker compose up --build
+```
+
+Open http://127.0.0.1:8080 after health becomes ready. The named data volume is initialized automatically and preserves Dify and PowerContext data. `DREAM_HTTP_PORT=18121 docker compose up --build` chooses a different loopback port. Resource limits are2CPU,2GiB and128PIDs. No account, external credential or manual DSL rebinding is needed. The root and application Compose files build their respective matching Dockerfile contexts. The complete source implementation remains inside `dify/`.
+
+For repeatable fresh-player checks, use a new fictional nickname. To reset all state, stop only this Compose project and remove its named data volume; this removes that game's saved history. First build needs network access to the pinned official images, PyPI, Debian, ModelScope and llama.cpp release asset. The demonstration URL is optional; local deployment operates independently from it.
+
+
+Build download recovery: model/runtime downloads now have30-second read timeouts, a600-second deadline per asset, up to5 attempts with verified Range resume, and SHA256 plus exact-size validation. Two independent assets download concurrently. Interrupted transfers, a server ignoring Range, wrong checksums, and verified caches were tested using an actual local HTTP server; evidence/download_recovery_test.json records results. The uncached standard Compose attempt stalled at435937280/491400032bytes and was stopped; evidence/previous_download_stall.json records this. Compose runtime acceptance used checksum-verified public asset caches from the preceding complete clean-root build. Caches contain no credentials and are not committed; normal builds download the same pinned assets. This is a real deployment reliability fix and does not establish the platformerror100cause.

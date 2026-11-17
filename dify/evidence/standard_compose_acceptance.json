@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "scope": "Real standard Docker Compose root build and fresh named volume deployment; subdir Compose configuration validated; actualDifyPowerContextQwen two turns",
+  "build_sec": 41.08244544900663,
+  "build_asset_cache": "prior_clean_build_verified_checksum_assets; initial_uncached_build_stallrecordpreserved",
+  "elapsed_sec": 134.54452167500858,
+  "container_id": "2ed03a89012a6ab24617e667bc1b141137f99c1f9f46957a0ceead897a6a3c40",
+  "image_id": "sha256:d65542ee52b60ee673c8453846beffeffb8f009c376574c18be1ca637500b673",
+  "memory_bytes": 2147483648,
+  "pids_limit": 128,
+  "OOMKilled": false,
+  "player": "compose-1794936419417659652",
+  "turns": [
+    {
+      "turn": 1,
+      "workflow_run_id": "afa252a2-854a-468b-9b94-519ca7691510",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "result": "梦境失物招领局 · 夜班营业\n玩家：compose-1794936419417659652｜本次失物：会说话的蓝雨伞 \"umbrella\"\n\n这是你的第一张梦境失物登记单。\n\n柜员说：给失物写封道歉信，然后它会变成会说话的伞，帮你找回它！\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    },
+    {
+      "turn": 2,
+      "workflow_run_id": "d1960873-030e-4dee-b82a-d9826a58b04c",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "result": "梦境失物招领局 · 夜班营业\n玩家：compose-1794936419417659652｜本次失物：会说话的蓝雨伞 \"umbrella\"\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞 \"umbrella\"”，做了“给失物写一封道歉信”。\n\n柜员说：这是一张梦境失物招领局的招领单。失物是会说话的蓝雨伞 \"umbrella\"。玩家可以去询问原因，也可以自己动手写封道歉信，然后它会变成会说话的伞，帮你找回它！\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+    }
+  ]
+}

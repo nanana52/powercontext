@@ -21,3 +21,19 @@ Visit http://127.0.0.1:8080 after initialization completes. Health returns 503 d
 All application code and the single DSL remain in [dify/](dify/), as required by the contest. [dify/README.md](dify/README.md) describes deployment, [dify/VALIDATION.md](dify/VALIDATION.md) provides the acceptance procedure, and [dify/PREVIEW.md](dify/PREVIEW.md) describes the external demonstration. Root Dockerfile and run.sh are convenience entrypoints for the identical application.
 
 Actual fresh-container, restart-persistence and external HTTPS evidence is in [dify/evidence/](dify/evidence/). These reports establish local reproducibility and are not a claim of a passing formal contest score. Previous formal runs returned error100 with no case/error detail; their backend failure cause has not been confirmed.
+
+
+## Standard Docker Compose entrypoint
+
+From either the repository root or `dify/`, run:
+
+```bash
+docker compose up --build
+```
+
+Open http://127.0.0.1:8080 after health becomes ready. The named data volume is initialized automatically and preserves Dify and PowerContext data. `DREAM_HTTP_PORT=18121 docker compose up --build` chooses a different loopback port. Resource limits are2CPU,2GiB and128PIDs. No account, external credential or manual DSL rebinding is needed. The root and application Compose files build their respective matching Dockerfile contexts. The complete source implementation remains inside `dify/`.
+
+For repeatable fresh-player checks, use a new fictional nickname. To reset all state, stop only this Compose project and remove its named data volume; this removes that game's saved history. First build needs network access to the pinned official images, PyPI, Debian, ModelScope and llama.cpp release asset. The demonstration URL is optional; local deployment operates independently from it.
+
+
+Build download recovery: model/runtime downloads now have30-second read timeouts, a600-second deadline per asset, up to5 attempts with verified Range resume, and SHA256 plus exact-size validation. Two independent assets download concurrently. Interrupted transfers, a server ignoring Range, wrong checksums, and verified caches were tested using an actual local HTTP server; evidence/download_recovery_test.json records results. The uncached standard Compose attempt stalled at435937280/491400032bytes and was stopped; evidence/previous_download_stall.json records this. Compose runtime acceptance used checksum-verified public asset caches from the preceding complete clean-root build. Caches contain no credentials and are not committed; normal builds download the same pinned assets. This is a real deployment reliability fix and does not establish the platformerror100cause.

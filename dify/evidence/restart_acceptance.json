@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "scope": "Same actual complete container after docker restart; durablePostgreSQLDify+PowerContextMemory",
+  "restart_ready_sec": 75.13182495799265,
+  "player": "single-1794923695895046690",
+  "workflow_run_id": "01c7b566-17d1-4eac-babe-b60f350a9d90",
+  "memory_saved": "是",
+  "previous_memory_loaded": "是",
+  "output": "梦境失物招领局 · 夜班营业\n玩家：single-1794923695895046690｜本次失物：会说话的蓝雨伞\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞”，做了“给雨伞写一封道歉信”。\n\n柜员说：你可以尝试去询问柜员上次登记的会说话的蓝雨伞怎么就不见了？为什么雨伞说：“谢谢你，会说话的，但我会告诉你，你不是会说话的。”？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。"
+}

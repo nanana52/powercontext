@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "scope": "Exact thinDifyruntime image;fresh2CPU2GiB128PIDnetworknonevolume;twoactualDifyPowerContextQwenworkflows",
+  "network": "none",
+  "seconds": 74.40129269199679,
+  "turns": [
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：offline-1794946259671779011｜本次失物：会说话的蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：嘿，梦，你这是在玩什么？不是在给雨伞写道歉信吗？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "workflow_run_id": "a8e7caad-9e74-4760-888e-f60a459d2e6d"
+    },
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：offline-1794946259671779011｜本次失物：会说话的蓝雨伞\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞”，做了“给雨伞写道歉信”。\n\n柜员说：请记住，梦的魔法总是让你想出最荒唐的办法。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "workflow_run_id": "a5c77e0d-92ec-470d-b922-ad2f79df6078"
+    }
+  ],
+  "OOMKilled": false,
+  "actual_memory_limit_bytes": 2147483648
+}

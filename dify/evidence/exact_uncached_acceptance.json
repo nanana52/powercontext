@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "scope": "Exact thinDifyruntime image;fresh2CPU2GiB128PIDnetworknonevolume;twoactualDifyPowerContextQwenworkflows",
+  "network": "none",
+  "seconds": 98.59681329299929,
+  "turns": [
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：offline-1794949354306498293｜本次失物：会说话的蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：给雨伞写道歉信，它会说：“对不起，我忘记带伞了。请原谅我。”\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "workflow_run_id": "bbf042eb-bd64-41e5-8310-97b4dc001bfa"
+    },
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：offline-1794949354306498293｜本次失物：会说话的蓝雨伞\n\n柜员翻出了你的旧登记：上次你带来“会说话的蓝雨伞”，做了“给雨伞写道歉信”。\n\n柜员说：玩家：给雨伞写道歉信，它会说：“对不起，我忘记带伞了。请原谅我。”\n玩家：问问为什么会出现在梦里。\n玩家：给雨伞写道歉信，它会说：“对不起，我忘记带伞了。请原谅我。”\n玩家：提出来更离谱的办法把它带回家。\n玩家：给雨伞写道歉信，它会说：“对不起，我忘记带伞了。请原谅我。”\n玩家：自己写一个行动，柜员会接着你的选择往下讲。\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "workflow_run_id": "09a831e8-febb-4586-b723-c823a5ac003f"
+    }
+  ],
+  "source_commit": "f8e3862aa9fbf11903aba1e2776e9271ad6e36f0",
+  "model_cache_used": false,
+  "OOMKilled": false,
+  "build_seconds": 319.59400038000604
+}

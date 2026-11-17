@@ -104,9 +104,19 @@ async def prepare(body: RecallRequest, authorization: str = Header(default="")):
     service, memory = await current_memory(body.scope_id)
     if memory is None:
         return {"context": "", "memories": [], "previous_memory_loaded": False}
-    result = await service.search(body.query, memories=(memory,), mode="fts", limit=10)
-    entries = list(result.hits)
-    # All game entries carry the ledger marker. Empty FTS terms do not fabricate history.
+    if body.query == "lostfoundledger":
+        # Search relevance is not chronology. Read authoritative current entries
+        # and use the latest committed Memory revision for "last visit".
+        versions = await service.entries(memory)
+        entries = sorted(
+            (entry for entry in versions if entry.text.splitlines()
+             and entry.text.splitlines()[0] == "lostfoundledger"),
+            key=lambda entry: (entry.created_in_revision, entry.entry_id),
+            reverse=True,
+        )[:10]
+    else:
+        result = await service.search(body.query, memories=(memory,), mode="fts", limit=10)
+        entries = list(result.hits)
     text = "\n\n".join(hit.text for hit in entries)
     text = text.encode("utf-8")[:body.max_bytes].decode("utf-8", errors="ignore")
     return {
@@ -223,7 +233,8 @@ async def workflow_generate(body: GenerateInput,authorization: str=Header(defaul
 async def workflow_save(body: SaveInput,authorization: str=Header(default='')):
     authenticate(authorization)
     g=body.generated;p=g.prepared
-    entry='lostfoundledger'+chr(10)+'\u5931\u7269:'+p.item+chr(10)+'\u884c\u52a8:'+p.move+chr(10)+'\u5267\u60c5:'+g.text
+    # Persist the player's choices, not the rendered reply that embeds prior history.
+    entry='lostfoundledger'+chr(10)+'\u5931\u7269:'+p.item+chr(10)+'\u884c\u52a8:'+p.move
     saved=await remember(RememberRequest(scope_id=p.scope_id,text=entry),authorization)
     if not saved['saved']:raise HTTPException(502,'Memory persistence was not confirmed')
     return {'result':g.text,'memory_saved':'\u662f','previous_memory_loaded':'\u662f' if p.previous_memory_loaded else '\u5426',

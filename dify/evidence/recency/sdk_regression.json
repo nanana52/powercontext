@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "latest_history_items": [
+    "\u5931\u7269:fourth_book",
+    "\u5931\u7269:third_hat",
+    "\u5931\u7269:second_clock",
+    "\u5931\u7269:first_umbrella"
+  ],
+  "saved_bytes": 53,
+  "old_nested_reply_not_resaved": true,
+  "different_player_empty": true,
+  "explicit_FTS_query": "PASS",
+  "actual_PowerContext": "1.2.0"
+}

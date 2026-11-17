@@ -1,0 +1,13 @@
+{
+  "commit": "f8e3862aa9fbf11903aba1e2776e9271ad6e36f0",
+  "model_cache_used": false,
+  "docker_layers_rebuilt": true,
+  "base_image": "existing checksum-pinned official Dify image; no registry pull benchmark",
+  "source_sha256": "bb6bf546dc0762d841b0809d38a45fafa4dc926b8cccc465615f2f286c731c18",
+  "source_files": 176,
+  "build_seconds": 319.59400038000604,
+  "build_returncode": 0,
+  "status": "PASS",
+  "total_seconds": 430.87986513599753,
+  "last_stage": "fresh_offline_runtime"
+}

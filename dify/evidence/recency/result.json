@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "SDK_chronology": "PASS",
+  "actual_workflows": 5,
+  "fresh_offline2G": "PASS",
+  "restart": "PASS",
+  "old_failure100_cause": "UNDETERMINED"
+}

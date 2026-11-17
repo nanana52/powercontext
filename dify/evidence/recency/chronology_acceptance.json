@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "three_actual_workflows": [
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：real-chronology-fixed｜本次失物：蓝雨伞\n\n这是你的第一张梦境失物登记单。\n\n柜员说：哈哈，给雨伞道歉真是个好主意！不过，你是不是忘了给雨伞换个合适的呢？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "否",
+      "workflow_run_id": "c196a5b6-c745-4599-a658-041d87382bbd"
+    },
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：real-chronology-fixed｜本次失物：会跳舞的钟\n\n柜员翻出了你的旧登记：上次你带来“蓝雨伞”，做了“给雨伞道歉”。\n\n柜员说：夜班柜员，给雨伞道歉？这钟真是个会跳舞的家伙，跳了一支漂亮的舞！\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "workflow_run_id": "becbc883-6b7a-4af2-a921-74dd1e05ab1f"
+    },
+    {
+      "result": "梦境失物招领局 · 夜班营业\n玩家：real-chronology-fixed｜本次失物：小黄帽\n\n柜员翻出了你的旧登记：上次你带来“会跳舞的钟”，做了“请钟跳一支舞”。\n\n柜员说：小黄帽的蓝雨伞在上次失而复得，而他却在失而复得后却忘记了上次的行动，这真是个让人头疼的谜题！\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+      "memory_saved": "是",
+      "previous_memory_loaded": "是",
+      "workflow_run_id": "d3768eee-db44-4238-90b9-d17efa8ba831"
+    }
+  ],
+  "separate_player": {
+    "result": "梦境失物招领局 · 夜班营业\n玩家：different-player-new｜本次失物：红靴子\n\n这是你的第一张梦境失物登记单。\n\n柜员说：哎呀，这红靴子呢？它在哪儿呢？\n\n接下来你可以：\nA. 问问失物为什么会出现在梦里。\nB. 提出一个更离谱的办法把它带回家。\n也可以自己写一个行动，柜员会接着你的选择往下讲。",
+    "memory_saved": "是",
+    "previous_memory_loaded": "否",
+    "workflow_run_id": "bd2dedab-6a59-4220-806c-a8de69069122"
+  },
+  "network": "none",
+  "resource": "2CPU2GiB128PID",
+  "OOMKilled": false,
+  "actual_memory_limit_bytes": 2147483648
+}

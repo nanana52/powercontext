@@ -1,0 +1,8 @@
+*
+!dify/
+!dify/**
+dify/evidence/
+dify/.runtime/
+dify/__pycache__/
+dify/.model-cache/*
+!dify/.model-cache/.gitkeep
